@@ -30,12 +30,27 @@ Can be called as so:
         NSLog(@"Failed with an error: %@", error);
     }];
 
+## Posts, Comments, Users
+
+Information that ForrstAPI grabs is parsed and returned to the caller as an object.  These objects are **FTPost**, **FTUser** and **FTComment**.  Calling `listPosts:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail;` for example, will give you a NSArray that contains FTPost objects.  Typically a way to deal with this would be:
+
+    NSMutableArray *_posts = [[NSMutableArray alloc] init];
+    
+    [[ForrstAPI engine] listPosts:^(NSArray *posts, NSUInteger page) {
+        for (FTPost *post in posts) {
+            [_posts addObject:post];
+        }
+        
+        // Update your content.
+    } fail:^(NSError *error) {
+        NSLog(@"Failed to fetch recent posts with error: %@", error);
+    }];
+
 #### Authentication
 
 At the moment, as mentioned above, authentication is disabled, but when it becomes enabled ForrstAPI will already be ready to authenticate.  It is only required that you call `authWithUser:password:completion:fail:` once, and after that the auth token will automatically be appended to all other calls.
 
 The token may also be saved upon the completion block, and then later assigned using the `authToken` property in ForrstAPI.
-
 
 #### Logging
 
