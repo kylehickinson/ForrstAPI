@@ -1,0 +1,8 @@
+//
+// Prefix header for all source files of the 'ForrstAPI' target in the 'ForrstAPI' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #include "FTConstants.h"
+#endif
