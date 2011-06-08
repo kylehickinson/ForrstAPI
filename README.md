@@ -37,9 +37,13 @@ Information that ForrstAPI grabs is parsed and returned to the caller as an obje
     NSMutableArray *_posts = [[NSMutableArray alloc] init];
     
     [[ForrstAPI engine] listPosts:^(NSArray *posts, NSUInteger page) {
-        for (FTPost *post in posts) {
-            [_posts addObject:post];
-        }
+        // All at once:
+        [_posts addObjectsFromArray:posts]
+    
+        // Or even individually if you want to grab only some data:
+        // for (FTPost *post in posts) {
+        
+        // }
         
         // Update your content.
     } fail:^(NSError *error) {
