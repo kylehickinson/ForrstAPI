@@ -49,6 +49,8 @@ typedef NSUInteger FTPostSort;
     NSInteger       _likeCount;
     NSInteger       _commentCount;
     
+    NSArray         *_tags;
+    
     NSURL           *_snapMegaURL;
     NSURL           *_snapKeithURL;
     NSURL           *_snapLargeURL;
@@ -82,6 +84,8 @@ typedef NSUInteger FTPostSort;
 @property (readonly) NSString       *formattedDescription;
 @property (readonly) NSInteger      likeCount;
 @property (readonly) NSInteger      commentCount;
+
+@property (readonly) NSArray        *tags;
 
 @property (readonly) UIImage        *snapMega;
 @property (readonly) UIImage        *snapKeith;

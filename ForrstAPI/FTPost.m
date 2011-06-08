@@ -140,6 +140,12 @@
             _snapThumbURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"thumb_url"]];
             _snapOriginalURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"original_url"]];
         }
+        
+        if ([dictionary objectForKey:@"tags"]) {
+            _tags = [[NSArray alloc] initWithArray:[dictionary objectForKey:@"tags"] copyItems:YES];
+        } else {
+            _tags = nil;
+        }
     }
     return self;
 }
@@ -164,6 +170,10 @@
         FT_RELEASE(_snapSmallURL);
         FT_RELEASE(_snapThumbURL);
         FT_RELEASE(_snapOriginalURL);
+    }
+    
+    if (_tags) {
+        FT_RELEASE(_tags);
     }
     
     [super dealloc];
