@@ -3,7 +3,7 @@
 //  ForrstAPI
 //
 //  Created by Kyle Hickinson on 11-06-04.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Kyle Hickinson. All rights reserved.
 //
 
 #import "FTPost.h"
