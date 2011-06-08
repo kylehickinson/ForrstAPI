@@ -25,7 +25,7 @@ ForrstAPI only requires you to import ForrstAPI.h and then can be initialized by
 Can be called as so:
 
     [[ForrstAPI engine] stats:^(NSUInteger rateLimit, NSInteger callsMade) {
-        NSLog(@"%d/%d; calls out of total limit", rateLimit, callsMade);
+        NSLog(@"%d/%d; calls out of total limit", callsMade, rateLimit);
     } fail:^(NSError *error) {
         NSLog(@"Failed with an error: %@", error);
     }];
