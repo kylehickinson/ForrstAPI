@@ -28,7 +28,8 @@
             description             = _description,
             formattedDescription    = _formattedDescripton,
             likeCount               = _likeCount,
-            commentCount            = _commentCount;
+            commentCount            = _commentCount,
+            tags                    = _tags;
 
 - (UIImage *)_checkCacheForKey:(NSString *)key {
     return [[FTCache cache] imageForKey:key type:FTCacheTypeSnap];
