@@ -28,54 +28,30 @@
             inDirectory     = _inDirectory,
             tags            = _tags;
 
-- (UIImage *)_checkCacheForKey:(NSString *)key {
-    return [[FTCache cache] imageForKey:key type:FTCacheTypeUserAvatar];
-}
-
-- (UIImage *)photosXL {
-    if (!_photosXL) {
-        _photosXL = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_xl", self.userID]];
-        if (!_photosXL) {
-            _photosXL = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photosXLURL]];
-        }
+- (void)photoForSize:(FTUserPhotoSize)size completion:(void (^)(UIImage *image))completion {
+    __block NSURL *_photoURL;
+    NSString *_photoSize;
+    
+    switch (size) {
+        case FTUserPhotoSizeXL: _photoURL = _photosXLURL; _photoSize = @"xl"; break;
+        case FTUserPhotoSizeLarge: _photoURL = _photosLargeURL; _photoSize = @"lg"; break;
+        case FTUserPhotoSizeMedium: _photoURL = _photosMediumURL; _photoSize = @"md"; break;
+        case FTUserPhotoSizeSmall: _photoURL = _photosSmallURL; _photoSize = @"sm"; break;
+        case FTUserPhotoSizeThumb: _photoURL = _photosThumbURL; _photoSize = @"th"; break;
     }
-    return _photosXL;
-}
-- (UIImage *)photosLarge {
-    if (!_photosLarge) {
-        _photosLarge = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_large", self.userID]];
-        if (!_photosLarge) {
-            _photosLarge = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photosLargeURL]];
+    
+    [[FTCache cache] imageForKey:[NSString stringWithFormat:@"%d_%@", self.userID, _photoSize] type:FTCacheTypeUserAvatar completion:^(UIImage *image) {
+        if (image == nil) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                UIImage *_imageFromFile = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photoURL]];
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    completion(_imageFromFile);
+                });
+            });
+        } else {
+            completion(image);
         }
-    }
-    return _photosLarge;
-}
-- (UIImage *)photosMedium {
-    if (!_photosMedium) {
-        _photosMedium = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_medium", self.userID]];
-        if (!_photosMedium) {
-            _photosMedium = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photosMediumURL]];
-        }
-    }
-    return _photosMedium;
-}
-- (UIImage *)photosSmall {
-    if (!_photosSmall) {
-        _photosSmall = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_small", self.userID]];
-        if (!_photosSmall) {
-            _photosSmall = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photosSmallURL]];
-        }
-    }
-    return _photosSmall;
-}
-- (UIImage *)photosThumb {
-    if (!_photosThumb) {
-        _photosThumb = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_thumb", self.userID]];
-        if (!_photosThumb) {
-            _photosThumb = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photosThumbURL]];
-        }
-    }
-    return _photosThumb;
+    }];
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {

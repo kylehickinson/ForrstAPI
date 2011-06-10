@@ -77,7 +77,9 @@
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     if (self.onFail) {
-        self.onFail(error);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.onFail(error);
+        });
     }
     
 #if FT_API_LOG

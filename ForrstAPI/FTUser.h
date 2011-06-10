@@ -10,6 +10,15 @@
 
 @class UIImage;
 
+enum {
+    FTUserPhotoSizeXL = 0,
+    FTUserPhotoSizeLarge,
+    FTUserPhotoSizeMedium,
+    FTUserPhotoSizeSmall,
+    FTUserPhotoSizeThumb
+};
+typedef NSUInteger FTUserPhotoSize;
+
 @interface FTUser : NSObject {
     NSUInteger      _userID;
     NSString        *_username;
@@ -35,12 +44,6 @@
     NSURL           *_photosMediumURL;
     NSURL           *_photosSmallURL;
     NSURL           *_photosThumbURL;
-    
-    UIImage         *_photosXL;
-    UIImage         *_photosLarge;
-    UIImage         *_photosMedium;
-    UIImage         *_photosSmall;
-    UIImage         *_photosThumb;
 }
 
 @property (readonly) NSUInteger     userID;
@@ -59,12 +62,7 @@
 @property (readonly) BOOL           inDirectory;
 @property (readonly) NSArray        *tags;
 
-@property (readonly) UIImage        *photosXL;
-@property (readonly) UIImage        *photosLarge;
-@property (readonly) UIImage        *photosMedium;
-@property (readonly) UIImage        *photosSmall;
-@property (readonly) UIImage        *photosThumb;
-
 - (id)initWithDictionary:(NSDictionary *)dictionary;
+- (void)photoForSize:(FTUserPhotoSize)size completion:(void (^)(UIImage *image))completion;
 
 @end

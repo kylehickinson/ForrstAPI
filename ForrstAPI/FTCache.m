@@ -42,51 +42,31 @@ FTCache *_cache;
 }
 
 - (void)addImage:(UIImage *)image forKey:(NSString *)key type:(FTCacheType)type {
-    switch (type) {
-        case FTCacheTypeSnap: {
-            NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", FT_CACHE_SNAPS_DIR, key] retain];
-            if (![_fileManager fileExistsAtPath:path]) {
-                [UIImagePNGRepresentation(image) writeToFile:path atomically:YES];
-            }
-            [path release];
-            break;
-        }  
-        case FTCacheTypeUserAvatar: {
-            NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", FT_CACHE_USERAVS_DIR, key] retain];
-            if (![_fileManager fileExistsAtPath:path]) {
-                [UIImagePNGRepresentation(image) writeToFile:path atomically:YES];
-            }
-            [path release];
-            break;
-        }
-        default:
-            break;
+    NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key] retain];
+    if (![_fileManager fileExistsAtPath:path]) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            [UIImagePNGRepresentation(image) writeToFile:path atomically:YES];
+        });
     }
+    [path release];
 }
 
-- (UIImage *)imageForKey:(NSString *)key type:(FTCacheType)type {
-    switch (type) {
-        case FTCacheTypeSnap: {
-            NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", FT_CACHE_SNAPS_DIR, key] retain];
-            if ([_fileManager fileExistsAtPath:path]) {
-                [path release];
-                return [UIImage imageWithContentsOfFile:path];
-            }
-            [path release];
-            break;
-        }
-        case FTCacheTypeUserAvatar: {
-            NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", FT_CACHE_USERAVS_DIR, key] retain];
-            if ([_fileManager fileExistsAtPath:path]) {
-                [path release];
-                return [UIImage imageWithContentsOfFile:path];
-            }
-            [path release];
-            break;
-        }
-            
+- (void)imageForKey:(NSString *)key type:(FTCacheType)type completion:(void (^)(UIImage *image))completion {
+    NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key] retain];
+    if ([_fileManager fileExistsAtPath:path]) {
+        [path release];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            UIImage *_image = [UIImage imageWithContentsOfFile:path];
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                completion(_image);
+            });
+        });
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completion(nil);
+        });
     }
-    return nil;
+    [path release];
 }
 
 - (void)dealloc {

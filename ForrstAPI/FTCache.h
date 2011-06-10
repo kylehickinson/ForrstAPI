@@ -25,6 +25,6 @@ typedef NSUInteger FTCacheType;
 
 + (FTCache *)cache;
 - (void)addImage:(UIImage *)image forKey:(NSString *)key type:(FTCacheType)type;
-- (UIImage *)imageForKey:(NSString *)key type:(FTCacheType)type;
+- (void)imageForKey:(NSString *)key type:(FTCacheType)type completion:(void (^)(UIImage *image))completion;
 
 @end

@@ -26,6 +26,17 @@ enum {
 };
 typedef NSUInteger FTPostSort;
 
+enum {
+    FTPostSnapSizeMega = 0,
+    FTPostSnapSizeKeith,
+    FTPostSnapSizeLarge,
+    FTPostSnapSizeMedium,
+    FTPostSnapSizeSmall,
+    FTPostSnapSizeThumb,
+    FTPostSnapSizeOriginal
+};
+typedef NSUInteger FTPostSnapSize;
+
 @interface FTPost : NSObject {
     NSUInteger      _postID;
     NSString        *_tinyID;
@@ -58,14 +69,6 @@ typedef NSUInteger FTPostSort;
     NSURL           *_snapSmallURL;
     NSURL           *_snapThumbURL;
     NSURL           *_snapOriginalURL;
-    
-    UIImage         *_snapMega;
-    UIImage         *_snapKeith;
-    UIImage         *_snapLarge;
-    UIImage         *_snapMedium;
-    UIImage         *_snapSmall;
-    UIImage         *_snapThumb;
-    UIImage         *_snapOriginal;
 }
 
 @property (readonly) NSUInteger     postID;
@@ -87,14 +90,7 @@ typedef NSUInteger FTPostSort;
 
 @property (readonly) NSArray        *tags;
 
-@property (readonly) UIImage        *snapMega;
-@property (readonly) UIImage        *snapKeith;
-@property (readonly) UIImage        *snapLarge;
-@property (readonly) UIImage        *snapMedium;
-@property (readonly) UIImage        *snapSmall;
-@property (readonly) UIImage        *snapThumb;
-@property (readonly) UIImage        *snapOriginal;
-
 - (id)initWithDictionary:(NSDictionary *)dictionary;
+- (void)snapForSize:(FTPostSnapSize)size completion:(void (^)(UIImage *image))completion;
 
 @end

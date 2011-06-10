@@ -31,72 +31,32 @@
             commentCount            = _commentCount,
             tags                    = _tags;
 
-- (UIImage *)_checkCacheForKey:(NSString *)key {
-    return [[FTCache cache] imageForKey:key type:FTCacheTypeSnap];
-}
-
-- (UIImage *)snapMega {
-    if (!_snapMega) {
-        _snapMega = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_mega", self.postID]];
-        if (!_snapMega) {
-            _snapMega = [UIImage imageWithData:[NSData dataWithContentsOfURL:_snapMegaURL]];
-        }
+- (void)snapForSize:(FTPostSnapSize)size completion:(void (^)(UIImage *image))completion {
+    __block NSURL *_photoURL;
+    NSString *_photoSize;
+    
+    switch (size) {
+        case FTPostSnapSizeMega: _photoURL = _snapMegaURL; _photoSize = @"mg"; break;
+        case FTPostSnapSizeKeith: _photoURL = _snapKeithURL; _photoSize = @"kt"; break;
+        case FTPostSnapSizeLarge: _photoURL = _snapLargeURL; _photoSize = @"lg"; break;
+        case FTPostSnapSizeMedium: _photoURL = _snapMediumURL; _photoSize = @"md"; break;
+        case FTPostSnapSizeSmall: _photoURL = _snapSmallURL; _photoSize = @"sm"; break;
+        case FTPostSnapSizeThumb: _photoURL = _snapThumbURL; _photoSize = @"th"; break;
+        case FTPostSnapSizeOriginal: _photoURL = _snapOriginalURL; _photoSize = @"or"; break;
     }
-    return _snapMega;
-}
-- (UIImage *)snapKeith {
-    if (!_snapKeith) {
-        _snapKeith = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_keith", self.postID]];
-        if (!_snapKeith) {
-            _snapKeith = [UIImage imageWithData:[NSData dataWithContentsOfURL:_snapKeithURL]];
+    
+    [[FTCache cache] imageForKey:[NSString stringWithFormat:@"%d_%@", self.postID, _photoSize] type:FTCacheTypeSnap completion:^(UIImage *image) {
+        if (image == nil) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                UIImage *_imageFromFile = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photoURL]];
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    completion(_imageFromFile);
+                });
+            });
+        } else {
+            completion(image);
         }
-    }
-    return _snapKeith;
-}
-- (UIImage *)snapLarge {
-    if (!_snapLarge) {
-        _snapLarge = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_large", self.postID]];
-        if (!_snapLarge) {
-            _snapLarge = [UIImage imageWithData:[NSData dataWithContentsOfURL:_snapLargeURL]];
-        }
-    }
-    return _snapLarge;
-}
-- (UIImage *)snapMedium {
-    if (!_snapMedium) {
-        _snapMedium = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_medium", self.postID]];
-        if (!_snapMedium) {
-            _snapMedium = [UIImage imageWithData:[NSData dataWithContentsOfURL:_snapMediumURL]];
-        }
-    }
-    return _snapMedium;
-}
-- (UIImage *)snapSmall {
-    if (!_snapSmall) {
-        _snapSmall = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_small", self.postID]];
-        if (!_snapSmall) {
-            _snapSmall = [UIImage imageWithData:[NSData dataWithContentsOfURL:_snapSmallURL]];
-        }
-    }
-    return _snapSmall;
-}
-- (UIImage *)snapThumb {
-    if (!_snapThumb) {
-        _snapThumb = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_thumb", self.postID]];
-        if (!_snapThumb) {
-            _snapThumb = [UIImage imageWithData:[NSData dataWithContentsOfURL:_snapThumbURL]];
-        }
-    }
-    return _snapThumb;
-}
-- (UIImage *)snapOriginal {
-    if (!_snapOriginal) {
-        _snapOriginal = [self _checkCacheForKey:[NSString stringWithFormat:@"%d_original", self.postID]];
-        if (!_snapOriginal) {
-            _snapOriginal = [UIImage imageWithData:[NSData dataWithContentsOfURL:_snapOriginalURL]];
-        }
-    }
-    return _snapOriginal;
+    }];
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
