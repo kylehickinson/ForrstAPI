@@ -270,11 +270,10 @@ ForrstAPI *_singleton;
         if (response.status == FTStatusOk) {
             if (completion) {
                 NSMutableArray *_list = [[NSMutableArray alloc] init];
-                NSArray *posts = [response.response objectForKey:@"posts"];
-                NSLog(@"posts count: %d", [posts count]);
                 for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
-                    FTPost *_post = [[[FTPost alloc] initWithDictionary:post] autorelease];
+                    FTPost *_post = [[FTPost alloc] initWithDictionary:post];
                     [_list addObject:_post];
+                    [_post release];
                 }
                 completion(_list, [[response.response objectForKey:@"page"] unsignedIntegerValue]);
             }

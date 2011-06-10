@@ -39,6 +39,8 @@
 - (void)_request:(NSURL *)url type:(FTRequestType)type completion:(NSCompletionBlock)completion fail:(void (^)(NSError *error))fail {
     _request = [[NSMutableURLRequest alloc] init];
     [_request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+    [_request setValue:FT_API_USERAGENT forHTTPHeaderField:@"User-Agent"];
+    
     switch (type) {
         case FTRequestTypeGet:
             [_request setHTTPMethod:@"GET"];

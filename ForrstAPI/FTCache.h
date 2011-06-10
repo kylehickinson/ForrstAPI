@@ -21,6 +21,8 @@ typedef NSUInteger FTCacheType;
 
 @interface FTCache : NSObject {
     NSFileManager *_fileManager;
+    
+    NSMutableDictionary *_memoryCache;
 }
 
 + (FTCache *)cache;

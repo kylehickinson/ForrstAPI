@@ -45,10 +45,12 @@
         case FTPostSnapSizeOriginal: _photoURL = _snapOriginalURL; _photoSize = @"or"; break;
     }
     
-    [[FTCache cache] imageForKey:[NSString stringWithFormat:@"%d_%@", self.postID, _photoSize] type:FTCacheTypeSnap completion:^(UIImage *image) {
+    NSString *key = [NSString stringWithFormat:@"%d_%@", self.postID, _photoSize];
+    [[FTCache cache] imageForKey:key type:FTCacheTypeSnap completion:^(UIImage *image) {
         if (image == nil) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 UIImage *_imageFromFile = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photoURL]];
+                [[FTCache cache] addImage:_imageFromFile forKey:key type:FTCacheTypeSnap];
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     completion(_imageFromFile);
                 });

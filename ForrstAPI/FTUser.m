@@ -40,10 +40,12 @@
         case FTUserPhotoSizeThumb: _photoURL = _photosThumbURL; _photoSize = @"th"; break;
     }
     
-    [[FTCache cache] imageForKey:[NSString stringWithFormat:@"%d_%@", self.userID, _photoSize] type:FTCacheTypeUserAvatar completion:^(UIImage *image) {
+    NSString *key = [NSString stringWithFormat:@"%d_%@", self.userID, _photoSize];
+    [[FTCache cache] imageForKey:key type:FTCacheTypeUserAvatar completion:^(UIImage *image) {
         if (image == nil) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 UIImage *_imageFromFile = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photoURL]];
+                [[FTCache cache] addImage:_imageFromFile forKey:key type:FTCacheTypeUserAvatar];
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     completion(_imageFromFile);
                 });
@@ -59,6 +61,7 @@
         
         _userID = [[dictionary objectForKey:@"id"] unsignedIntegerValue];
         _username = [[dictionary objectForKey:@"username"] copy];
+        _name = [[dictionary objectForKey:@"name"] copy];
         _url = [[NSURL alloc] initWithString:[dictionary objectForKey:@"url"]];
         _posts = [((NSString *)[dictionary objectForKey:@"posts"]) integerValue];
         _comments = [((NSString *)[dictionary objectForKey:@"comments"]) integerValue];

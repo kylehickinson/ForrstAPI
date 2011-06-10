@@ -6,7 +6,9 @@
 //  Copyright 2011 Kyle Hickinson. All rights reserved.
 //
 
-#define FT_RELEASE(__PTR) { [__PTR release]; __PTR = nil; }
-#define FT_API_BASEURL @"http://forrst.com/api/v2/"
+#define FT_RELEASE(__PTR)   { [__PTR release]; __PTR = nil; }
+#define FT_API_BASEURL      @"http://forrst.com/api/v2/"
 
-#define FT_API_LOG  0
+#define FT_API_LOG          0
+
+#define FT_API_USERAGENT    @"__YourUserAgent__"
