@@ -30,6 +30,12 @@ ForrstAPI *_singleton;
     return self;
 }
 
+- (void)dealloc {
+    FT_RELEASE(_authToken);
+    
+    [super dealloc];
+}
+
 - (NSURL *)_setupURLWithString:(NSString *)url {
     return [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@", FT_API_BASEURL, url, (_authToken ? [NSString stringWithFormat:@"&access_token=%@", _authToken] : @"")]];
 }
@@ -63,7 +69,7 @@ ForrstAPI *_singleton;
 
     [FTRequest request:url type:FTRequestTypePost completion:^(FTResponse *response) {
         if (response.status == FTStatusOk) {
-            _authToken = [response.response objectForKey:@"token"];
+            _authToken = [[response.response objectForKey:@"token"] copy];
             if (completion) {
                 completion(_authToken);
             }
