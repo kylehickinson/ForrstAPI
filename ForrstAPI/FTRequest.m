@@ -33,6 +33,9 @@
     FT_RELEASE(_request);
     FT_RELEASE(_requestData);
     
+    FT_RELEASE(_onCompletion);
+    FT_RELEASE(_onFail);
+    
     [super dealloc];
 }
 

@@ -35,7 +35,7 @@ ForrstAPI *_singleton;
 }
 
 - (void)stats:(void (^)(NSUInteger rateLimit, NSInteger callsMade))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [self _setupURLWithString:@"stats"];
+    NSURL *url = [[self _setupURLWithString:@"stats"] retain];
 
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - stats:%@ fail:%@ (url=%@)", self, completion, fail, url);
@@ -137,9 +137,12 @@ ForrstAPI *_singleton;
             if (completion) {
                 NSMutableArray *_posts = [[NSMutableArray alloc] init];
                 for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
-                    [_posts addObject:[[[FTPost alloc] initWithDictionary:post] autorelease]];
+                    FTPost *_post = [[FTPost alloc] initWithDictionary:post];
+                    [_posts addObject:_post];
+                    [_post release];
                 }
                 completion(_posts);
+                [_posts release];
             }
         }
     } fail:fail];
@@ -215,7 +218,7 @@ ForrstAPI *_singleton;
                 default:
                     sort = @"recent"; break;
             }
-            [_url appendFormat:@"&sort=%@", [options objectForKey:@"sort"]];
+            [_url appendFormat:@"&sort=%@", sort];
         }
         
         if ([options objectForKey:@"page"]) {
@@ -237,7 +240,6 @@ ForrstAPI *_singleton;
                 for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
                     FTPost *_post = [[FTPost alloc] initWithDictionary:post];
                     [_list addObject:_post];
-                    NSLog(@"_list addObject:%p (%@)", _post, post);
                     [_post release];
                 }
                 completion(_list, [[response.response objectForKey:@"page"] unsignedIntegerValue]);
@@ -276,6 +278,7 @@ ForrstAPI *_singleton;
                     [_post release];
                 }
                 completion(_list, [[response.response objectForKey:@"page"] unsignedIntegerValue]);
+                [_list release];
             }
         }
     } fail:fail];

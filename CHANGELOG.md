@@ -1,4 +1,9 @@
-## Fri Jun 10 / commit `8fb9f4aba0d61c17cfda`
+### Sat Jun 11
+
+* Bug fixes
+* Memory leaks fixed
+
+### Fri Jun 10 
 
 * Fixed FTCache bug (wasn't adding anything to the cache)
 * Added memory cache for images along with the already implemented file cache

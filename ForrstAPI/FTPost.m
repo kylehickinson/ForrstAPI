@@ -25,6 +25,7 @@
             title                   = _title,
             attachedURL             = _attachedURL,
             content                 = _content,
+            formattedContent        = _formattedContent,
             description             = _description,
             formattedDescription    = _formattedDescripton,
             likeCount               = _likeCount,
@@ -33,7 +34,7 @@
 
 - (void)snapForSize:(FTPostSnapSize)size completion:(void (^)(UIImage *image))completion {
     __block NSURL *_photoURL;
-    NSString *_photoSize;
+    NSString *_photoSize = nil;
     
     switch (size) {
         case FTPostSnapSizeMega: _photoURL = _snapMegaURL; _photoSize = @"mg"; break;
@@ -88,6 +89,7 @@
         _title = [[dictionary objectForKey:@"title"] copy];
         _attachedURL = [[NSURL alloc] initWithString:[dictionary objectForKey:@"url"]];
         _content = [[dictionary objectForKey:@"content"] copy];
+        _formattedContent = [[dictionary objectForKey:@"formatted_content"] copy];
         _description = [[dictionary objectForKey:@"description"] copy];
         _formattedDescription = [[dictionary objectForKey:@"formatted_description"] copy];
         _likeCount = [((NSString *)[dictionary objectForKey:@"like_count"]) integerValue];
@@ -102,6 +104,7 @@
             _snapSmallURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"small_url"]];
             _snapThumbURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"thumb_url"]];
             _snapOriginalURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"original_url"]];
+            [snaps release];
         }
         
         if ([dictionary objectForKey:@"tags"]) {

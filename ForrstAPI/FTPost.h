@@ -54,6 +54,7 @@ typedef NSUInteger FTPostSnapSize;
     NSURL           *_attachedURL;
     
     NSString        *_content;
+    NSString        *_formattedContent;
     NSString        *_description;
     NSString        *_formattedDescription;
     
@@ -83,6 +84,7 @@ typedef NSUInteger FTPostSnapSize;
 @property (readonly) NSString       *title;
 @property (readonly) NSURL          *attachedURL;
 @property (readonly) NSString       *content;
+@property (readonly) NSString       *formattedContent;
 @property (readonly) NSString       *description;
 @property (readonly) NSString       *formattedDescription;
 @property (readonly) NSInteger      likeCount;

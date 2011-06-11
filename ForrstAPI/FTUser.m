@@ -30,7 +30,7 @@
 
 - (void)photoForSize:(FTUserPhotoSize)size completion:(void (^)(UIImage *image))completion {
     __block NSURL *_photoURL;
-    NSString *_photoSize;
+    NSString *_photoSize = nil;
     
     switch (size) {
         case FTUserPhotoSizeXL: _photoURL = _photosXLURL; _photoSize = @"xl"; break;
