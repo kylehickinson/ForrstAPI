@@ -9,7 +9,9 @@
 #import "FTRequest.h"
 #import "JSONKit.h"
 
-@interface FTRequest (Private)
+#import <UIKit/UIApplication.h>
+
+@interface FTRequest ()
 - (void)_request:(NSURL *)url type:(FTRequestType)type completion:(void (^)(FTResponse *response))completion fail:(void (^)(NSError *error))fail;
 @end
 
@@ -33,10 +35,12 @@
     FT_RELEASE(_request);
     FT_RELEASE(_requestData);
     
-    FT_RELEASE(_onCompletion);
-    FT_RELEASE(_onFail);
+    self.onCompletion = nil;
+    self.onFail = nil;
     
+#if !USING_ARC
     [super dealloc];
+#endif
 }
 
 - (void)_request:(NSURL *)url type:(FTRequestType)type completion:(NSCompletionBlock)completion fail:(void (^)(NSError *error))fail {
@@ -87,6 +91,8 @@
         });
     }
     
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    
 #if FT_API_LOG
     NSLog(@"FTRequest (%p) - connection:%@ didFailWithError:%@", self, connection, error);
 #endif
@@ -99,25 +105,41 @@
 #endif
 }
 
-#if FT_API_LOG
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+#if FT_API_LOG
     NSLog(@"FTRequest (%p) - connection:%@ didResceiveResponse:%@", self, connection, response);
-}
 #endif
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+}
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
 #if FT_API_LOG
     NSLog(@"FTRequest (%p) - connectionDidFinishLoading:%@", self, connection);
 #endif
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     
     JSONDecoder *_decoder = [[JSONDecoder alloc] init];
-    if (self.onCompletion) {
-        FTResponse *response = [[FTResponse alloc] initWithDictionary:[_decoder objectWithData:_requestData]];
-        dispatch_async(dispatch_get_main_queue(), ^ {
-            self.onCompletion(response);
-        });
-        [response release];
+    NSDictionary *results = [_decoder objectWithData:_requestData];
+    FTResponse *response = [[FTResponse alloc] initWithDictionary:results];
+#if !USING_ARC
+    [response autorelease];
+#endif
+    
+    if (response.status == FTStatusFail) {
+        if (self.onFail) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.onFail([NSError errorWithDomain:FTErrorDomainStatusFail code:FTErrorDomainStatusFailCode userInfo:results]);
+            });
+        }
+    } else {
+        if (self.onCompletion) {
+            dispatch_async(dispatch_get_main_queue(), ^ {
+                self.onCompletion(response);
+            });
+        }
     }
+    
     [_decoder release];
 }
 

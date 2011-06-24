@@ -47,18 +47,21 @@ FTCache *_cache;
 }
 
 - (void)addImage:(UIImage *)image forKey:(NSString *)key type:(FTCacheType)type {
-    NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key] retain];
+    NSString *path = [[NSString alloc] initWithFormat:@"%@%@%@", NSTemporaryDirectory(), (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key];
     if (![_fileManager fileExistsAtPath:path]) {
         [_memoryCache setObject:image forKey:path];
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
             [UIImagePNGRepresentation(image) writeToFile:path atomically:YES];
         });
     }
+    
+#if !USING_ARC
     [path release];
+#endif
 }
 
 - (void)imageForKey:(NSString *)key type:(FTCacheType)type completion:(void (^)(UIImage *image))completion {
-    NSString *path = [[NSTemporaryDirectory() stringByAppendingFormat:@"%@%@", (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key] retain];
+    NSString *path = [[NSString alloc] initWithFormat:@"%@%@%@", NSTemporaryDirectory(), (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key];
     if ([_memoryCache objectForKey:path]) {
         dispatch_async(dispatch_get_main_queue(), ^{
             completion([_memoryCache objectForKey:path]);
@@ -66,9 +69,10 @@ FTCache *_cache;
     } else {
         if ([_fileManager fileExistsAtPath:path]) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-                UIImage *_image = [UIImage imageWithContentsOfFile:path];
+                UIImage *_image = [[UIImage alloc] initWithContentsOfFile:path];
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     completion(_image);
+                    [_image release];
                 });
             });
         } else {
@@ -77,14 +81,20 @@ FTCache *_cache;
             });
         }
     }
+    
+#if !USING_ARC
     [path release];
+#endif
+//    [path release];
 }
 
 - (void)dealloc {
     FT_RELEASE(_fileManager);
     FT_RELEASE(_memoryCache);
     
+#if !USING_ARC
     [super dealloc];
+#endif
 }
 
 

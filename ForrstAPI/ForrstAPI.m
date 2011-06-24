@@ -19,6 +19,9 @@ ForrstAPI *_singleton;
 + (ForrstAPI *)engine {
     if (!_singleton) {
         _singleton = [[ForrstAPI alloc] init];
+#if !USING_ARC
+        [_singleton retain];
+#endif
     }
     return _singleton;
 }
@@ -33,7 +36,9 @@ ForrstAPI *_singleton;
 - (void)dealloc {
     FT_RELEASE(_authToken);
     
+#if !USING_ARC
     [super dealloc];
+#endif
 }
 
 - (NSURL *)_setupURLWithString:(NSString *)url {
@@ -41,7 +46,7 @@ ForrstAPI *_singleton;
 }
 
 - (void)stats:(void (^)(NSUInteger rateLimit, NSInteger callsMade))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [[self _setupURLWithString:@"stats"] retain];
+    NSURL *url = [self _setupURLWithString:@"stats"];
 
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - stats:%@ fail:%@ (url=%@)", self, completion, fail, url);
@@ -56,12 +61,10 @@ ForrstAPI *_singleton;
             }
         }
     } fail:fail];
-    
-    [url release];
 }
 
 - (void)authWithUser:(NSString *)user password:(NSString *)password completion:(void (^)(NSString *token))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [[self _setupURLWithString:[NSString stringWithFormat:@"auth?email_or_username=%@&password=%@", user, password]] retain];
+    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"auth?email_or_username=%@&password=%@", user, password]];
     
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - authWithUser:%@ password:%@ completion:%@ fail:%@ (url=%@)", self, user, password, completion, fail, url);
@@ -75,13 +78,11 @@ ForrstAPI *_singleton;
             }
         }
     } fail:fail];
-    
-    [url release];
 }
 
 - (void)userInformationForUser:(NSString *)user completion:(void (^)(FTUser *user))completion fail:(void (^)(NSError *error))fail {
     NSString *param = ([user integerValue] != 0 ? @"id" : @"username");
-    NSURL *url = [[self _setupURLWithString:[NSString stringWithFormat:@"users/info?%@=%@", param, user]] retain];
+    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"users/info?%@=%@", param, user]];
     
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - userInformationForUser:%@ completion:%@ fail:%@ (url=%@)", self, user, completion, fail, url);
@@ -96,8 +97,6 @@ ForrstAPI *_singleton;
             }
         }
     } fail:fail];
-    
-    [url release];
 }
 
 - (void)userPostsForUser:(NSString *)user completion:(void (^)(NSArray *posts))completion fail:(void (^)(NSError *error))fail {
@@ -131,7 +130,7 @@ ForrstAPI *_singleton;
         }
     }
     
-    NSURL *url = [[self _setupURLWithString:_url] retain];
+    NSURL *url = [self _setupURLWithString:_url];
     
     
 #if FT_API_LOG 
@@ -153,12 +152,13 @@ ForrstAPI *_singleton;
         }
     } fail:fail];
     
+#if !USING_ARC
     [_url release];
-    [url release];
+#endif
 }
 
 - (void)postForID:(NSString *)postID completion:(void (^)(FTPost *post))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [[self _setupURLWithString:[NSString stringWithFormat:@"posts/show?id=%@"]] retain];
+    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"posts/show?id=%@", postID]];
     
     
 #if FT_API_LOG 
@@ -173,13 +173,11 @@ ForrstAPI *_singleton;
                 [post release];
             }
         }
-    } fail:fail];
-    
-    [url release];
+    } fail:fail];   
 }
 
 - (void)postForTinyID:(NSString *)postID completion:(void (^)(FTPost *post))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [[self _setupURLWithString:[NSString stringWithFormat:@"posts/show?tiny_id=%@"]] retain];
+    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"posts/show?tiny_id=%@", postID]];
     
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%@) - postForTinyID:%@ completion:%@ fail:%@ (url=%@)", self, postID, completion, fail, url);
@@ -194,8 +192,6 @@ ForrstAPI *_singleton;
             }
         }
     } fail:fail];
-    
-    [url release];
 }
 
 - (void)listPostsForType:(FTPostType)type completion:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail {
@@ -232,7 +228,7 @@ ForrstAPI *_singleton;
         }
     }
     
-    NSURL *url = [[self _setupURLWithString:_url] retain];
+    NSURL *url = [self _setupURLWithString:_url];
     
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - listPostsForType:%d (%@) options:%@ completion:%@ fail:%@ (url=%@)", self, type, postType, options, completion, fail, url);
@@ -254,8 +250,9 @@ ForrstAPI *_singleton;
         }
     } fail:fail];
     
+#if !USING_ARC
     [_url release];
-    [url release];
+#endif
 }
 
 - (void)listPosts:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail {
@@ -265,36 +262,44 @@ ForrstAPI *_singleton;
 - (void)listPostsAfter:(NSUInteger)after completion:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail {
     NSMutableString *_url = [[NSMutableString alloc] initWithString:@"posts/all"];
     if (after != 0) {
-        [_url appendFormat:@"&after=%d", after];
+        [_url appendFormat:@"?after=%d", after];
     }
     
-    NSURL *url = [[self _setupURLWithString:_url] retain];
+    NSURL *url = [self _setupURLWithString:_url];
     
 #if FT_API_LOG
     NSLog(@"ForrstAPI (%p) - listPostsAfter:%d completion:%@ fail:%@ (url=%@)", self, after, completion, fail, url);
 #endif
     
-    [FTRequest request:url type:FTRequestTypeGet completion:^(FTResponse *__strong response) {
+    [FTRequest request:url type:FTRequestTypeGet completion:^(FTResponse *response) {
         if (response.status == FTStatusOk) {
-            if (completion) {
+            if (completion) {                
                 NSMutableArray *_list = [[NSMutableArray alloc] init];
+#if !USING_ARC
+                [_list autorelease];
+#endif
                 for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
                     FTPost *_post = [[FTPost alloc] initWithDictionary:post];
                     [_list addObject:_post];
+#if !USING_ARC
                     [_post release];
+#endif
                 }
-                completion(_list, [[response.response objectForKey:@"page"] unsignedIntegerValue]);
-                [_list release];
+                
+                NSUInteger page = [[response.response objectForKey:@"page"] unsignedIntegerValue];
+                
+                completion(_list, page);
             }
         }
     } fail:fail];
     
-    [url release];
+#if !USING_ARC
     [_url release];
+#endif
 }
 
 - (void)commentsForPostId:(NSString *)postID completion:(void (^)(NSArray *comments, NSUInteger count))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [[self _setupURLWithString:[NSString stringWithFormat:@"post/comments?id=%@"]] retain];
+    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"post/comments?id=%@", postID]];
     
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - commentsForPostId:%@ completion:%@ fail:%@ (url=%@)", self, postID, completion, fail, url);
@@ -304,7 +309,7 @@ ForrstAPI *_singleton;
         if (response.status == FTStatusOk) {
             if (completion) {
                 NSMutableArray *_list = [[NSMutableArray alloc] init];
-                for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
+                for (NSDictionary *post in [response.response objectForKey:@"comments"]) {
                     FTPost *_post = [[FTPost alloc] initWithDictionary:post];
                     [_list addObject:_post];
                     [_post release];
@@ -314,11 +319,9 @@ ForrstAPI *_singleton;
             }
         }
     } fail:fail];
-    
-    [url release];
 }
 - (void)commentsForPostTinyId:(NSString *)postID completion:(void (^)(NSArray *comments, NSUInteger count))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [[self _setupURLWithString:[NSString stringWithFormat:@"post/comments?tiny_id=%@"]] retain];
+    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"post/comments?tiny_id=%@", postID]];
     
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - commentsForPostTinyId:%@ completion:%@ fail:%@ (url=%@)", self, postID, completion, fail, url);
@@ -338,8 +341,6 @@ ForrstAPI *_singleton;
             }
         }
     } fail:fail];
-    
-    [url release];
 }
 
 @end

@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "FTResponse.h"
 
+#define FTErrorDomainStatusFail     @"FTErrorDomainStatusFail"
+#define FTErrorDomainStatusFailCode -1
+
 enum {
     FTRequestTypeGet = 0,
     FTRequestTypePost,
