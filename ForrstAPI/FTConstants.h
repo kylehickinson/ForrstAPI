@@ -13,8 +13,8 @@
     #define FT_RELEASE(__PTR)   { __PTR = nil; }
 #endif
 
-#define FT_API_BASEURL      @"http://forrst.com/api/v2/"
+#define FT_API_BASEURL      @"https://forrst.com/api/v2/"
 
-#define FT_API_LOG          0
+#define FT_API_LOG          1
 
-#define FT_API_USERAGENT    @"__YourUserAgent__"
+#define FT_API_USERAGENT    @"__YourAgent__"

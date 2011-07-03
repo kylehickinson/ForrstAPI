@@ -42,7 +42,13 @@ ForrstAPI *_singleton;
 }
 
 - (NSURL *)_setupURLWithString:(NSString *)url {
-    return [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@", FT_API_BASEURL, url, (_authToken ? [NSString stringWithFormat:@"&access_token=%@", _authToken] : @"")]];
+    return [NSURL URLWithString:
+                [[NSString stringWithFormat:@"%@%@%@", 
+                                            FT_API_BASEURL, 
+                                            url, 
+                                            (self.authToken ? [NSString stringWithFormat:@"&access_token=%@", self.authToken] : @"")] 
+                stringByReplacingPercentEscapesUsingEncoding:NSASCIIStringEncoding]
+            ];
 }
 
 - (void)stats:(void (^)(NSUInteger rateLimit, NSInteger callsMade))completion fail:(void (^)(NSError *error))fail {
@@ -64,7 +70,7 @@ ForrstAPI *_singleton;
 }
 
 - (void)authWithUser:(NSString *)user password:(NSString *)password completion:(void (^)(NSString *token))completion fail:(void (^)(NSError *error))fail {
-    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"auth?email_or_username=%@&password=%@", user, password]];
+    NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"users/auth?email_or_username=%@&password=%@", user, password]];
     
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - authWithUser:%@ password:%@ completion:%@ fail:%@ (url=%@)", self, user, password, completion, fail, url);

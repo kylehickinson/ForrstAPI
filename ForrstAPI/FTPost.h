@@ -56,7 +56,7 @@ typedef NSUInteger FTPostSnapSize;
     NSString        *_content;
     NSString        *_formattedContent;
     NSString        *_description;
-    NSString        *_formattedDescription;
+    NSString        *_formattedDesc;
     
     NSInteger       _likeCount;
     NSInteger       _commentCount;
@@ -86,7 +86,7 @@ typedef NSUInteger FTPostSnapSize;
 @property (readonly) NSString       *content;
 @property (readonly) NSString       *formattedContent;
 @property (readonly) NSString       *description;
-@property (readonly) NSString       *formattedDescription;
+@property (readonly) NSString       *formattedDesc;
 @property (readonly) NSInteger      likeCount;
 @property (readonly) NSInteger      commentCount;
 

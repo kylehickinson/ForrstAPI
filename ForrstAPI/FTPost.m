@@ -27,7 +27,7 @@
             content                 = _content,
             formattedContent        = _formattedContent,
             description             = _description,
-            formattedDescription    = _formattedDescripton,
+            formattedDesc           = _formattedDesc,
             likeCount               = _likeCount,
             commentCount            = _commentCount,
             tags                    = _tags;
@@ -93,7 +93,8 @@
         _content = [[dictionary objectForKey:@"content"] copy];
         _formattedContent = [[dictionary objectForKey:@"formatted_content"] copy];
         _description = [[dictionary objectForKey:@"description"] copy];
-        _formattedDescription = [[dictionary objectForKey:@"formatted_description"] copy];
+        _formattedDesc = [[dictionary objectForKey:@"formatted_description"] copy];
+
         _likeCount = [((NSString *)[dictionary objectForKey:@"like_count"]) integerValue];
         _commentCount = [((NSString *)[dictionary objectForKey:@"comment_count"]) integerValue];
         
@@ -127,8 +128,9 @@
     FT_RELEASE(_title);
     FT_RELEASE(_attachedURL);
     FT_RELEASE(_content);
+    FT_RELEASE(_formattedContent);
     FT_RELEASE(_description);
-    FT_RELEASE(_formattedDescription);
+    FT_RELEASE(_formattedDesc);
     
     if (_type == FTPostTypeSnap) {
         FT_RELEASE(_snapMegaURL);

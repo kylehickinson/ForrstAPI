@@ -54,15 +54,25 @@
             [_request setURL:url];
             break;
         case FTRequestTypePost: {
+            // Apparently the URL isn't formatted properly? Wtf.  Oh well, manually getting the parameters and base url.
             [_request setHTTPMethod:@"POST"];
-            NSData *postData = [[[url parameterString] stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES];
+            
+            NSString *s = [url absoluteString];
+            NSRange r = [s rangeOfString:@"?"];
+            
+            NSString *parameters = [[s substringFromIndex:r.location+1] stringByReplacingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
+            NSString *base = [s substringToIndex:r.location];
+            
+            NSData *postData = [parameters dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+            
             [_request setValue:[NSString stringWithFormat:@"%d", [postData length]] forHTTPHeaderField:@"Content-Length"];
             [_request setHTTPBody:postData];
             [_request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-            [_request setURL:[url baseURL]];
+            [_request setURL:[NSURL URLWithString:base]];
             break;
         }
         case FTRequestTypePut:
+            // Not going to implement this until the API actually needs it.
             [_request setHTTPMethod:@"PUT"];
             [_request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
             break;
@@ -141,6 +151,10 @@
     }
     
     [_decoder release];
+}
+
+- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
+    return [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust];
 }
 
 @end
