@@ -132,9 +132,6 @@
     JSONDecoder *_decoder = [[JSONDecoder alloc] init];
     NSDictionary *results = [_decoder objectWithData:_requestData];
     FTResponse *response = [[FTResponse alloc] initWithDictionary:results];
-#if !USING_ARC
-    [response autorelease];
-#endif
     
     if (response.status == FTStatusFail) {
         if (self.onFail) {
@@ -150,6 +147,9 @@
         }
     }
     
+#if !USING_ARC
+    [response autorelease];
+#endif
     [_decoder release];
 }
 

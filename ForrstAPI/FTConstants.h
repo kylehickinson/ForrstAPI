@@ -8,13 +8,13 @@
 
 #if !__has_feature(objc_arc)
     #define FT_RELEASE(__PTR)   { [__PTR release]; __PTR = nil; }
-    #define strong              nonatomic, retain
+    #define strong              retain
 #else
     #define FT_RELEASE(__PTR)   { __PTR = nil; }
 #endif
 
 #define FT_API_BASEURL      @"https://forrst.com/api/v2/"
 
-#define FT_API_LOG          1
+#define FT_API_LOG          0
 
 #define FT_API_USERAGENT    @"__YourAgent__"

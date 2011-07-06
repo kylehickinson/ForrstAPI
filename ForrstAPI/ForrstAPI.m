@@ -116,13 +116,17 @@ ForrstAPI *_singleton;
     if (options) {
         if ([options objectForKey:@"type"]) {
             NSString *type;
-            switch ([[options objectForKey:@"type"] unsignedIntegerValue]) {
-                case FTPostTypeCode: type = @"code"; break;
-                case FTPostTypeLink: type = @"link"; break;
-                case FTPostTypeQuestion: type = @"question"; break;
-                case FTPostTypeSnap:
-                default:
-                    type = @"snap"; break;
+            if (![[options objectForKey:@"type"] isKindOfClass:[NSString class]]) {
+                switch ([[options objectForKey:@"type"] unsignedIntegerValue]) {
+                    case FTPostTypeCode: type = @"code"; break;
+                    case FTPostTypeLink: type = @"link"; break;
+                    case FTPostTypeQuestion: type = @"question"; break;
+                    case FTPostTypeSnap:
+                    default:
+                        type = @"snap"; break;
+                }
+            } else {
+                type = [options objectForKey:@"key"];
             }
             [_url appendFormat:@"&type=%@", type];
         }
@@ -219,12 +223,16 @@ ForrstAPI *_singleton;
     if (options) {
         if ([options objectForKey:@"sort"]) {
             NSString *sort;
-            switch ([[options objectForKey:@"sort"] unsignedIntegerValue]) {
-                case FTPostSortPopular: sort = @"popular"; break;
-                case FTPostSortBest: sort = @"best"; break;
-                case FTPostSortRecent:
-                default:
-                    sort = @"recent"; break;
+            if (![[options objectForKey:@"sort"] isKindOfClass:[NSString class]]) {
+                switch ([[options objectForKey:@"sort"] unsignedIntegerValue]) {
+                    case FTPostSortPopular: sort = @"popular"; break;
+                    case FTPostSortBest: sort = @"best"; break;
+                    case FTPostSortRecent:
+                    default:
+                        sort = @"recent"; break;
+                }
+            } else {
+                sort = [options objectForKey:@"sort"];
             }
             [_url appendFormat:@"&sort=%@", sort];
         }
