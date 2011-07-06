@@ -126,7 +126,7 @@ ForrstAPI *_singleton;
                         type = @"snap"; break;
                 }
             } else {
-                type = [options objectForKey:@"key"];
+                type = [options objectForKey:@"type"];
             }
             [_url appendFormat:@"&type=%@", type];
         }
