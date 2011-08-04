@@ -2,7 +2,7 @@
 
 ForrstAPI is a fully integrated iOS objective-C wrapper for the Forrst API.  All API that Forrst has to offer is integrated into this wrapper, including: 
 
-* User authentication (note: at the moment, kyle, the founder of forrst, has disabled this call due to the lack of a SSL cert.)
+* User authentication
 * User information
 * User posts
 * Viewing a single post
