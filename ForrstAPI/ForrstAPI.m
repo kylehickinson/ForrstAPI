@@ -9,13 +9,10 @@
 #import "ForrstAPI.h"
 #import "FTRequest.h"
 
-@implementation ForrstAPI (Singleton)
-ForrstAPI *_singleton;
-@end
-
 @implementation ForrstAPI
 @synthesize authToken = _authToken;
 
+static ForrstAPI *_singleton = nil;
 + (ForrstAPI *)engine {
     if (!_singleton) {
         _singleton = [[ForrstAPI alloc] init];
@@ -26,37 +23,51 @@ ForrstAPI *_singleton;
     return _singleton;
 }
 
-- (id)init {
+- (id)init 
+{
     if ((self = [super init])) {
         _authToken = nil;
     }
     return self;
 }
 
-- (void)dealloc {
-    FT_RELEASE(_authToken);
-    
 #if !USING_ARC
+- (void)dealloc 
+{
+    [_authToken release], _authToken = nil;
     [super dealloc];
-#endif
 }
+#endif
 
-- (NSURL *)_setupURLWithString:(NSString *)url {
+- (NSURL *)_setupURLWithString:(NSString *)url 
+{
+    BOOL hasParams = NO;
+    if (self.authToken) {
+        for (int i = [url length]-1; i >= 0; i--) {
+            if ([url characterAtIndex:i] == '?') {
+                hasParams = YES;
+                break;
+            }
+        }
+    }
+    
     return [NSURL URLWithString:
                 [[NSString stringWithFormat:@"%@%@%@", 
                                             FT_API_BASEURL, 
-                                            url, 
-                                            (self.authToken ? [NSString stringWithFormat:@"&access_token=%@", self.authToken] : @"")] 
+                                            url,
+                                            (self.authToken ? [NSString stringWithFormat:@"%@access_token=%@", (hasParams ? @"&" : @"?"), self.authToken] : @"")] 
                 stringByReplacingPercentEscapesUsingEncoding:NSASCIIStringEncoding]
             ];
 }
 
-- (void)stats:(void (^)(NSUInteger rateLimit, NSInteger callsMade))completion fail:(void (^)(NSError *error))fail {
+- (void)stats:(FTStatsCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSURL *url = [self _setupURLWithString:@"stats"];
 
 #if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - stats:%@ fail:%@ (url=%@)", self, completion, fail, url);
 #endif
+    
     [FTRequest request:url type:FTRequestTypeGet completion:^(FTResponse *response) {
         if (response.status == FTStatusOk) {
             if (completion) {
@@ -69,7 +80,8 @@ ForrstAPI *_singleton;
     } fail:fail];
 }
 
-- (void)authWithUser:(NSString *)user password:(NSString *)password completion:(void (^)(NSString *token))completion fail:(void (^)(NSError *error))fail {
+- (void)authWithUser:(NSString *)user password:(NSString *)password completion:(void (^)(NSString *token))completion fail:(FTErrorReturnBlock)fail 
+{
     NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"users/auth?email_or_username=%@&password=%@", user, password]];
     
 #if FT_API_LOG 
@@ -79,14 +91,18 @@ ForrstAPI *_singleton;
     [FTRequest request:url type:FTRequestTypePost completion:^(FTResponse *response) {
         if (response.status == FTStatusOk) {
             _authToken = [[response.response objectForKey:@"token"] copy];
-            if (completion) {
-                completion(_authToken);
+            if (_authToken) {
+                if (completion) {
+                    NSLog(@"authed_as: %@", response.authedAs);
+                    completion(_authToken);
+                }
             }
         }
     } fail:fail];
 }
 
-- (void)userInformationForUser:(NSString *)user completion:(void (^)(FTUser *user))completion fail:(void (^)(NSError *error))fail {
+- (void)userInformationForUser:(NSString *)user completion:(FTUserCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSString *param = ([user integerValue] != 0 ? @"id" : @"username");
     NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"users/info?%@=%@", param, user]];
     
@@ -105,11 +121,13 @@ ForrstAPI *_singleton;
     } fail:fail];
 }
 
-- (void)userPostsForUser:(NSString *)user completion:(void (^)(NSArray *posts))completion fail:(void (^)(NSError *error))fail {
+- (void)userPostsForUser:(NSString *)user completion:(FTPostsCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     [self userPostsForUser:user options:nil completion:completion fail:fail];
 }
 
-- (void)userPostsForUser:(NSString *)user options:(NSDictionary *)options completion:(void (^)(NSArray *posts))completion fail:(void (^)(NSError *error))fail {
+- (void)userPostsForUser:(NSString *)user options:(NSDictionary *)options completion:(FTPostsCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSString *param = ([user integerValue] != 0 ? @"id" : @"username");
     NSMutableString *_url = [[NSMutableString alloc] initWithFormat:@"user/posts?%@=%@", param, user];
     
@@ -167,7 +185,8 @@ ForrstAPI *_singleton;
 #endif
 }
 
-- (void)postForID:(NSString *)postID completion:(void (^)(FTPost *post))completion fail:(void (^)(NSError *error))fail {
+- (void)postForID:(NSString *)postID completion:(FTPostCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"posts/show?id=%@", postID]];
     
     
@@ -186,7 +205,8 @@ ForrstAPI *_singleton;
     } fail:fail];   
 }
 
-- (void)postForTinyID:(NSString *)postID completion:(void (^)(FTPost *post))completion fail:(void (^)(NSError *error))fail {
+- (void)postForTinyID:(NSString *)postID completion:(FTPostCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"posts/show?tiny_id=%@", postID]];
     
 #if FT_API_LOG 
@@ -204,10 +224,13 @@ ForrstAPI *_singleton;
     } fail:fail];
 }
 
-- (void)listPostsForType:(FTPostType)type completion:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail {
+- (void)listPostsForType:(FTPostType)type completion:(FTPostsAndPageCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     [self listPostsForType:type options:nil completion:completion fail:fail];
 }
-- (void)listPostsForType:(FTPostType)type options:(NSDictionary *)options completion:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail {
+
+- (void)listPostsForType:(FTPostType)type options:(NSDictionary *)options completion:(FTPostsAndPageCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSString *postType;
     
     switch (type) {
@@ -258,7 +281,7 @@ ForrstAPI *_singleton;
                     [_list addObject:_post];
                     [_post release];
                 }
-                completion(_list, [[response.response objectForKey:@"page"] unsignedIntegerValue]);
+                completion(_list, [((NSString *)[response.response objectForKey:@"page"]) integerValue]);
                 [_list release];
             }
         }
@@ -269,11 +292,13 @@ ForrstAPI *_singleton;
 #endif
 }
 
-- (void)listPosts:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail {
+- (void)listPosts:(FTPostsAndPageCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     [self listPostsAfter:0 completion:completion fail:fail];
 }
 
-- (void)listPostsAfter:(NSUInteger)after completion:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail {
+- (void)listPostsAfter:(NSUInteger)after completion:(FTPostsAndPageCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSMutableString *_url = [[NSMutableString alloc] initWithString:@"posts/all"];
     if (after != 0) {
         [_url appendFormat:@"?after=%d", after];
@@ -289,9 +314,6 @@ ForrstAPI *_singleton;
         if (response.status == FTStatusOk) {
             if (completion) {                
                 NSMutableArray *_list = [[NSMutableArray alloc] init];
-#if !USING_ARC
-                [_list autorelease];
-#endif
                 for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
                     FTPost *_post = [[FTPost alloc] initWithDictionary:post];
                     [_list addObject:_post];
@@ -300,9 +322,19 @@ ForrstAPI *_singleton;
 #endif
                 }
                 
-                NSUInteger page = [[response.response objectForKey:@"page"] unsignedIntegerValue];
+                NSUInteger pageNumber = 0;
+                id page = [response.response objectForKey:@"page"];
+                if ([page isKindOfClass:[NSString class]]) {
+                    pageNumber = [(NSString *)page integerValue]; 
+                } else { 
+                    pageNumber = [(NSNumber *)page integerValue];
+                }
                 
-                completion(_list, page);
+                completion(_list, pageNumber);
+                
+#if !USING_ARC
+                [_list release];
+#endif
             }
         }
     } fail:fail];
@@ -312,7 +344,8 @@ ForrstAPI *_singleton;
 #endif
 }
 
-- (void)commentsForPostId:(NSString *)postID completion:(void (^)(NSArray *comments, NSUInteger count))completion fail:(void (^)(NSError *error))fail {
+- (void)commentsForPostId:(NSString *)postID completion:(FTCommentsCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"post/comments?id=%@", postID]];
     
 #if FT_API_LOG 
@@ -334,7 +367,9 @@ ForrstAPI *_singleton;
         }
     } fail:fail];
 }
-- (void)commentsForPostTinyId:(NSString *)postID completion:(void (^)(NSArray *comments, NSUInteger count))completion fail:(void (^)(NSError *error))fail {
+
+- (void)commentsForPostTinyId:(NSString *)postID completion:(FTCommentsCompletionBlock)completion fail:(FTErrorReturnBlock)fail 
+{
     NSURL *url = [self _setupURLWithString:[NSString stringWithFormat:@"post/comments?tiny_id=%@", postID]];
     
 #if FT_API_LOG 

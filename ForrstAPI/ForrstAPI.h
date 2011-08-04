@@ -12,6 +12,15 @@
 #import "FTPost.h"
 #import "FTComment.h"
 
+typedef void (^FTStatsCompletionBlock)(NSUInteger rateLimit, NSInteger callsMade);
+typedef void (^FTUserCompletionBlock)(FTUser *user);
+typedef void (^FTPostCompletionBlock)(FTPost *post);
+typedef void (^FTPostsCompletionBlock)(NSArray *posts);
+typedef void (^FTPostsAndPageCompletionBlock)(NSArray *posts, NSUInteger page);
+typedef void (^FTCommentsCompletionBlock)(NSArray *comments, NSUInteger count);
+
+typedef void (^FTErrorReturnBlock)(NSError *error);
+
 @interface ForrstAPI : NSObject {
     NSString *_authToken;
 }

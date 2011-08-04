@@ -14,21 +14,12 @@ enum {
 };
 typedef NSUInteger FTStatus;
 
-@interface FTResponse : NSObject {
-    FTStatus        _status;
-    float           _timespan;
-    BOOL            _authed;
-    id              _authedAs;
-    
-    NSString        *_environment;
-    
-    NSDictionary    *_response;
-}
+@interface FTResponse : NSObject
 
 @property (readonly) FTStatus       status;
 @property (readonly) float          timespan;
 @property (readonly) BOOL           authed;
-@property (readonly) id             authedAs;
+@property (readonly) NSArray        *authedAs;
 @property (readonly) NSString       *environment;
 @property (readonly) NSDictionary   *response;
 

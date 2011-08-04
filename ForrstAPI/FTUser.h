@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "FTForrstMe.h"
 
 @class UIImage;
 
@@ -20,25 +21,6 @@ enum {
 typedef NSUInteger FTUserPhotoSize;
 
 @interface FTUser : NSObject {
-    NSUInteger      _userID;
-    NSString        *_username;
-    NSString        *_name;
-    NSURL           *_url;
-    
-    NSInteger       _posts;
-    NSInteger       _comments;
-    NSInteger       _likes;
-    NSInteger       _followers;
-    NSInteger       _following;
-
-    NSString        *_bio;
-    NSString        *_type;
-    NSURL           *_homepage;
-    NSString        *_twitter;
-    
-    BOOL            _inDirectory;
-    NSMutableArray  *_tags;
-    
     NSURL           *_photosXLURL;
     NSURL           *_photosLargeURL;
     NSURL           *_photosMediumURL;
@@ -49,6 +31,7 @@ typedef NSUInteger FTUserPhotoSize;
 @property (readonly) NSUInteger     userID;
 @property (readonly) NSString       *username;
 @property (readonly) NSString       *name;
+@property (readonly) BOOL           availableForWork;
 @property (readonly) NSURL          *url;
 @property (readonly) NSInteger      posts;
 @property (readonly) NSInteger      comments;
@@ -61,6 +44,7 @@ typedef NSUInteger FTUserPhotoSize;
 @property (readonly) NSString       *twitter;
 @property (readonly) BOOL           inDirectory;
 @property (readonly) NSArray        *tags;
+@property (readonly) FTForrstMe     *forrstMe;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 - (void)photoForSize:(FTUserPhotoSize)size completion:(void (^)(UIImage *image))completion;

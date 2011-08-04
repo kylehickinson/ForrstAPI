@@ -8,8 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define FT_CACHE_SNAPS_DIR       @"forrst_database/snaps/"
-#define FT_CACHE_USERAVS_DIR     @"forrst_database/user_avatars/"
+typedef void (^FTImageCompletion)(UIImage *image);
 
 @class UIImage;
 
@@ -19,14 +18,10 @@ enum {
 };
 typedef NSUInteger FTCacheType;
 
-@interface FTCache : NSObject {
-    NSFileManager *_fileManager;
-    
-    NSMutableDictionary *_memoryCache;
-}
+@interface FTCache : NSObject
 
 + (FTCache *)cache;
-- (void)addImage:(UIImage *)image forKey:(NSString *)key type:(FTCacheType)type;
-- (void)imageForKey:(NSString *)key type:(FTCacheType)type completion:(void (^)(UIImage *image))completion;
+- (void)addImage:(UIImage *)image forKey:(NSString *)key;
+- (void)imageForKey:(NSString *)key completion:(FTImageCompletion)completion;
 
 @end

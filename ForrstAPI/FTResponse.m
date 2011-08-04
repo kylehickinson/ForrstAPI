@@ -28,7 +28,10 @@
         _timespan = [[dictionary objectForKey:@"in"] floatValue];
         _authed = [[dictionary objectForKey:@"authed"] boolValue];
         if (_authed) {
-            _authedAs = (NSArray *)[dictionary objectForKey:@"authed_as"];
+            _authedAs = [dictionary objectForKey:@"authed_as"];
+#if !USING_ARC
+            [_authedAs retain];
+#endif
         } else {
             _authedAs = nil;
         }
@@ -46,9 +49,7 @@
 - (void)dealloc {
     FT_RELEASE(_environment);
     FT_RELEASE(_response);
-    if (_authedAs) {
-        FT_RELEASE(_authedAs);
-    }
+    FT_RELEASE(_authedAs);
     
     [super dealloc];
 }

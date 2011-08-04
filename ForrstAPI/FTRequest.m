@@ -39,7 +39,7 @@
     self.onFail = nil;
     
 #if !USING_ARC
-    [super dealloc];
+    [super dealloc]; 
 #endif
 }
 
@@ -67,7 +67,6 @@
             
             [_request setValue:[NSString stringWithFormat:@"%d", [postData length]] forHTTPHeaderField:@"Content-Length"];
             [_request setHTTPBody:postData];
-            [_request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
             [_request setURL:[NSURL URLWithString:base]];
             break;
         }
@@ -83,7 +82,15 @@
     
     self.onCompletion = completion;
     self.onFail = fail;
-    _connection = [[NSURLConnection alloc] initWithRequest:_request delegate:self startImmediately:YES];
+    
+    if ([NSURLConnection canHandleRequest:_request]) {
+        _connection = [[NSURLConnection alloc] initWithRequest:_request delegate:self startImmediately:YES];
+        if (_connection) {
+            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+        }
+    } else {
+        self.onFail([NSError errorWithDomain:FTErrorDomainFailedRequest code:FTErrorDomainFailedRequestCode userInfo:nil]);
+    }
 }
 
 + (void)request:(NSURL *)url type:(FTRequestType)type completion:(NSCompletionBlock)completion fail:(void (^)(NSError *error))fail {
@@ -119,8 +126,6 @@
 #if FT_API_LOG
     NSLog(@"FTRequest (%p) - connection:%@ didResceiveResponse:%@", self, connection, response);
 #endif
-    
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
@@ -131,6 +136,17 @@
     
     JSONDecoder *_decoder = [[JSONDecoder alloc] init];
     NSDictionary *results = [_decoder objectWithData:_requestData];
+    
+    if (!results) { 
+        if (self.onFail) {
+            self.onFail([NSError errorWithDomain:FTErrorDomainInvalidResults code:FTErrorDomainInvalidResultsCode userInfo:results]);
+        }
+#if !USING_ARC
+        [_decoder release];
+#endif
+        return;
+    }
+    
     FTResponse *response = [[FTResponse alloc] initWithDictionary:results];
     
     if (response.status == FTStatusFail) {
@@ -149,8 +165,9 @@
     
 #if !USING_ARC
     [response autorelease];
-#endif
     [_decoder release];
+#endif
+
 }
 
 - (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {

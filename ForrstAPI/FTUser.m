@@ -8,6 +8,8 @@
 
 #import "FTUser.h"
 #import "FTCache.h"
+#import "FTDownloadQueue.h"
+#import "NSString+Crypto.h"
 
 #import <UIKit/UIKit.h>
 
@@ -15,6 +17,7 @@
 @synthesize userID          = _userID,
             username        = _username,
             name            = _name,
+            availableForWork= _availableForWork,
             url             = _url,
             posts           = _posts,
             comments        = _comments,
@@ -26,32 +29,32 @@
             homepage        = _homepage,
             twitter         = _twitter,
             inDirectory     = _inDirectory,
-            tags            = _tags;
+            tags            = _tags,
+            forrstMe        = _forrstMe;
 
 - (void)photoForSize:(FTUserPhotoSize)size completion:(void (^)(UIImage *image))completion {
     __block NSURL *_photoURL;
-    NSString *_photoSize = nil;
-    
+
     switch (size) {
-        case FTUserPhotoSizeXL: _photoURL = _photosXLURL; _photoSize = @"xl"; break;
-        case FTUserPhotoSizeLarge: _photoURL = _photosLargeURL; _photoSize = @"lg"; break;
-        case FTUserPhotoSizeMedium: _photoURL = _photosMediumURL; _photoSize = @"md"; break;
-        case FTUserPhotoSizeSmall: _photoURL = _photosSmallURL; _photoSize = @"sm"; break;
-        case FTUserPhotoSizeThumb: _photoURL = _photosThumbURL; _photoSize = @"th"; break;
+        case FTUserPhotoSizeXL: _photoURL = _photosXLURL; break;
+        case FTUserPhotoSizeLarge: _photoURL = _photosLargeURL; break;
+        case FTUserPhotoSizeMedium: _photoURL = _photosMediumURL; break;
+        case FTUserPhotoSizeSmall: _photoURL = _photosSmallURL; break;
+        case FTUserPhotoSizeThumb: _photoURL = _photosThumbURL; break;
     }
     
-    NSString *key = [NSString stringWithFormat:@"%d_%@", self.userID, _photoSize];
-    [[FTCache cache] imageForKey:key type:FTCacheTypeUserAvatar completion:^(UIImage *image) {
+    __block NSString *key = [[_photoURL absoluteString] MD5];
+#if !USING_ARC
+    [key retain];
+#endif
+    [[FTCache cache] imageForKey:key completion:^(UIImage *image) {
         if (image == nil) {
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-                UIImage *_imageFromFile = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photoURL]];
-                [[FTCache cache] addImage:_imageFromFile forKey:key type:FTCacheTypeUserAvatar];
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    completion(_imageFromFile);
-                    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-                });
-            });
+            [[FTDownloadQueue defaultManager] enqueueDownload:_photoURL completed:^(UIImage *image) {
+                [[FTCache cache] addImage:image forKey:key];
+                completion(image);
+                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+            }];           
         } else {
             completion(image);
         }
@@ -64,6 +67,7 @@
         _userID = [[dictionary objectForKey:@"id"] unsignedIntegerValue];
         _username = [[dictionary objectForKey:@"username"] copy];
         _name = [[dictionary objectForKey:@"name"] copy];
+        _availableForWork = [[dictionary objectForKey:@"available_for_work"] boolValue];
         _url = [[NSURL alloc] initWithString:[dictionary objectForKey:@"url"]];
         _posts = [((NSString *)[dictionary objectForKey:@"posts"]) integerValue];
         _comments = [((NSString *)[dictionary objectForKey:@"comments"]) integerValue];
@@ -88,10 +92,12 @@
         _photosThumbURL = [[NSURL alloc] initWithString:[photos objectForKey:@"thumb_url"]];
         [photos release];
         
+        _forrstMe = [[FTForrstMe alloc] initWithDictionary:[dictionary objectForKey:@"forrst_me"]];
     }
     return self;
 }
 
+#if !USING_ARC
 - (void)dealloc {
     FT_RELEASE(_username);
     FT_RELEASE(_name);
@@ -101,6 +107,7 @@
     FT_RELEASE(_homepage);
     FT_RELEASE(_twitter);
     FT_RELEASE(_tags);
+    FT_RELEASE(_forrstMe);
     
     FT_RELEASE(_photosXLURL);
     FT_RELEASE(_photosLargeURL);
@@ -110,5 +117,6 @@
     
     [super dealloc];
 }
+#endif
 
 @end

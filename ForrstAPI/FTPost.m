@@ -9,6 +9,8 @@
 #import "FTPost.h"
 #import "FTUser.h"
 #import "FTCache.h"
+#import "FTDownloadQueue.h"
+#import "NSString+Crypto.h"
 
 #import <UIKit/UIKit.h>
 
@@ -30,34 +32,34 @@
             formattedDesc           = _formattedDesc,
             likeCount               = _likeCount,
             commentCount            = _commentCount,
+            viewCount               = _viewCount,
             tags                    = _tags;
 
 - (void)snapForSize:(FTPostSnapSize)size completion:(void (^)(UIImage *image))completion {
     __block NSURL *_photoURL;
-    NSString *_photoSize = nil;
     
     switch (size) {
-        case FTPostSnapSizeMega: _photoURL = _snapMegaURL; _photoSize = @"mg"; break;
-        case FTPostSnapSizeKeith: _photoURL = _snapKeithURL; _photoSize = @"kt"; break;
-        case FTPostSnapSizeLarge: _photoURL = _snapLargeURL; _photoSize = @"lg"; break;
-        case FTPostSnapSizeMedium: _photoURL = _snapMediumURL; _photoSize = @"md"; break;
-        case FTPostSnapSizeSmall: _photoURL = _snapSmallURL; _photoSize = @"sm"; break;
-        case FTPostSnapSizeThumb: _photoURL = _snapThumbURL; _photoSize = @"th"; break;
-        case FTPostSnapSizeOriginal: _photoURL = _snapOriginalURL; _photoSize = @"or"; break;
+        case FTPostSnapSizeMega: _photoURL = _snapMegaURL; break;
+        case FTPostSnapSizeKeith: _photoURL = _snapKeithURL; break;
+        case FTPostSnapSizeLarge: _photoURL = _snapLargeURL; break;
+        case FTPostSnapSizeMedium: _photoURL = _snapMediumURL; break;
+        case FTPostSnapSizeSmall: _photoURL = _snapSmallURL; break;
+        case FTPostSnapSizeThumb: _photoURL = _snapThumbURL; break;
+        case FTPostSnapSizeOriginal: _photoURL = _snapOriginalURL; break;
     }
     
-    NSString *key = [NSString stringWithFormat:@"%d_%@", self.postID, _photoSize];
-    [[FTCache cache] imageForKey:key type:FTCacheTypeSnap completion:^(UIImage *image) {
+    __block NSString *key = [[_photoURL absoluteString] MD5];
+#if !USING_ARC
+    [key retain];
+#endif
+    [[FTCache cache] imageForKey:key completion:^(UIImage *image) {
         if (image == nil) {
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-                UIImage *_imageFromFile = [UIImage imageWithData:[NSData dataWithContentsOfURL:_photoURL]];
-                [[FTCache cache] addImage:_imageFromFile forKey:key type:FTCacheTypeSnap];
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    completion(_imageFromFile);
-                    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-                });
-            });
+            [[FTDownloadQueue defaultManager] enqueueDownload:_photoURL completed:^(UIImage *image) {
+                [[FTCache cache] addImage:image forKey:key];
+                completion(image);
+                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+            }];
         } else {
             completion(image);
         }
@@ -97,6 +99,7 @@
 
         _likeCount = [((NSString *)[dictionary objectForKey:@"like_count"]) integerValue];
         _commentCount = [((NSString *)[dictionary objectForKey:@"comment_count"]) integerValue];
+        _viewCount = [((NSString *)[dictionary objectForKey:@"view_count"]) integerValue];
         
         if (_type == FTPostTypeSnap) {
             NSDictionary *snaps = [[NSDictionary alloc] initWithDictionary:[dictionary objectForKey:@"snaps"]];
@@ -107,7 +110,9 @@
             _snapSmallURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"small_url"]];
             _snapThumbURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"thumb_url"]];
             _snapOriginalURL = [[NSURL alloc] initWithString:[snaps objectForKey:@"original_url"]];
+#if !USING_ARC
             [snaps release];
+#endif
         }
         
         if ([dictionary objectForKey:@"tags"]) {
@@ -119,6 +124,7 @@
     return self;
 }
 
+#if !USING_ARC
 - (void)dealloc {
     FT_RELEASE(_tinyID);
     FT_RELEASE(_url);
@@ -148,5 +154,6 @@
     
     [super dealloc];
 }
+#endif
 
 @end

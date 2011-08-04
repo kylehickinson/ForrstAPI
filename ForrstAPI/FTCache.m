@@ -7,23 +7,31 @@
 //
 
 #import "FTCache.h"
+#import "NSString+Crypto.h"
 #import <UIKit/UIKit.h>
 
-@implementation FTCache (Singleton)
-FTCache *_cache;
+@interface FTCache ()
+@property (strong) NSFileManager *fileManager;
+@property (strong) NSMutableDictionary *memoryCache;
 @end
 
 @implementation FTCache
+@synthesize fileManager = _fileManager;
+@synthesize memoryCache = _memoryCache;
 
 + (FTCache *)cache {
+    static FTCache *_cache = nil;
     if (!_cache) {
-        _cache = [[FTCache alloc] init];
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            _cache = [[FTCache alloc] init];
+        });
     }
     return _cache;
 }
 
 - (void)clearMemoryCache {
-    [_memoryCache removeAllObjects];
+    [self.memoryCache removeAllObjects];
 }
 
 - (id)init {
@@ -31,71 +39,82 @@ FTCache *_cache;
         _fileManager = [[NSFileManager defaultManager] retain];
         _memoryCache = [[NSMutableDictionary alloc] init];
         
-        NSString *path = [[NSTemporaryDirectory() stringByAppendingPathComponent:FT_CACHE_SNAPS_DIR] retain];
-        if (![_fileManager fileExistsAtPath:path]) {
-            [_fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-        }
-        [path release];
-        path = [[NSTemporaryDirectory() stringByAppendingPathComponent:FT_CACHE_USERAVS_DIR] retain];
-        
-        if (![_fileManager fileExistsAtPath:path]) {
-            [_fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-        }
-        [path release];
+//        NSString *path = [[NSTemporaryDirectory() stringByAppendingPathComponent:FT_CACHE_SNAPS_DIR] retain];
+//        if (![_fileManager fileExistsAtPath:path]) {
+//            [_fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+//        }
+//        [path release];
+//        path = [[NSTemporaryDirectory() stringByAppendingPathComponent:FT_CACHE_USERAVS_DIR] retain];
+//        
+//        if (![_fileManager fileExistsAtPath:path]) {
+//            [_fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+//        }
+//        [path release];
     }
     return self;
 }
 
-- (void)addImage:(UIImage *)image forKey:(NSString *)key type:(FTCacheType)type {
-    NSString *path = [[NSString alloc] initWithFormat:@"%@%@%@", NSTemporaryDirectory(), (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key];
-    if (![_fileManager fileExistsAtPath:path]) {
-        [_memoryCache setObject:image forKey:path];
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            [UIImagePNGRepresentation(image) writeToFile:path atomically:YES];
-        });
-    }
-    
+- (void)addImage:(UIImage *)image forKey:(NSString *)key
+{
+    if (image && [key length] != 0) {
+        NSString *path = [[NSString alloc] initWithFormat:@"%@%@", NSTemporaryDirectory(), key];
+        if (![_fileManager fileExistsAtPath:path]) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                NSData *pngRep = UIImagePNGRepresentation(image);
+                if (pngRep) {
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        [self.memoryCache setObject:pngRep forKey:key];
+                    });
+                }
+                [pngRep writeToFile:path atomically:YES];
+            });
+        }
 #if !USING_ARC
-    [path release];
+        [path release];
 #endif
+    }
 }
 
-- (void)imageForKey:(NSString *)key type:(FTCacheType)type completion:(void (^)(UIImage *image))completion {
-    NSString *path = [[NSString alloc] initWithFormat:@"%@%@%@", NSTemporaryDirectory(), (type == FTCacheTypeSnap ? FT_CACHE_SNAPS_DIR : FT_CACHE_USERAVS_DIR), key];
-    if ([_memoryCache objectForKey:path]) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            completion([_memoryCache objectForKey:path]);
-        });
-    } else {
-        if ([_fileManager fileExistsAtPath:path]) {
+- (void)imageForKey:(NSString *)key completion:(FTImageCompletion)completion
+{
+    if ([key length] != 0 && completion) {
+        NSString *path = [[NSString alloc] initWithFormat:@"%@%@", NSTemporaryDirectory(), key];
+        if ([self.memoryCache objectForKey:key]) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-                UIImage *_image = [[UIImage alloc] initWithContentsOfFile:path];
+                UIImage *image = [UIImage imageWithData:[self.memoryCache objectForKey:key]];
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    completion(_image);
-                    [_image release];
+                    completion(image);
                 });
             });
         } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            if ([self.fileManager fileExistsAtPath:path]) {
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                    NSData *_imageData = [NSData dataWithContentsOfFile:path];
+                    UIImage *_image = [UIImage imageWithData:_imageData];
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        [self.memoryCache setObject:_imageData forKey:key];
+                        completion(_image);
+                    });
+                });
+            } else {
                 completion(nil);
-            });
+            }
         }
-    }
-    
 #if !USING_ARC
-    [path release];
+        [path release];
 #endif
-//    [path release];
+    }
 }
 
-- (void)dealloc {
-    FT_RELEASE(_fileManager);
-    FT_RELEASE(_memoryCache);
-    
 #if !USING_ARC
+- (void)dealloc {
+    self.memoryCache = nil;
+    self.fileManager = nil;
+    
     [super dealloc];
-#endif
 }
+#endif
+
 
 
 @end

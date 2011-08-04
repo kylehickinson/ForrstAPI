@@ -37,39 +37,14 @@ enum {
 };
 typedef NSUInteger FTPostSnapSize;
 
-@interface FTPost : NSObject {
-    NSUInteger      _postID;
-    NSString        *_tinyID;
-    NSURL           *_url;
-
-    FTPostType      _type;
-    
-    NSString        *_createdAt;
-    NSString        *_updatedAt;
-    
-    FTUser          *_user;
-    BOOL            _published;
-    BOOL            _public;
-    NSString        *_title;
-    NSURL           *_attachedURL;
-    
-    NSString        *_content;
-    NSString        *_formattedContent;
-    NSString        *_description;
-    NSString        *_formattedDesc;
-    
-    NSInteger       _likeCount;
-    NSInteger       _commentCount;
-    
-    NSArray         *_tags;
-    
-    NSURL           *_snapMegaURL;
-    NSURL           *_snapKeithURL;
-    NSURL           *_snapLargeURL;
-    NSURL           *_snapMediumURL;
-    NSURL           *_snapSmallURL;
-    NSURL           *_snapThumbURL;
-    NSURL           *_snapOriginalURL;
+@interface FTPost : NSObject {    
+    NSURL *_snapMegaURL;
+    NSURL *_snapKeithURL;
+    NSURL *_snapLargeURL;
+    NSURL *_snapMediumURL;
+    NSURL *_snapSmallURL;
+    NSURL *_snapThumbURL;
+    NSURL *_snapOriginalURL;
 }
 
 @property (readonly) NSUInteger     postID;
@@ -89,6 +64,7 @@ typedef NSUInteger FTPostSnapSize;
 @property (readonly) NSString       *formattedDesc;
 @property (readonly) NSInteger      likeCount;
 @property (readonly) NSInteger      commentCount;
+@property (readonly) NSInteger      viewCount;
 
 @property (readonly) NSArray        *tags;
 
