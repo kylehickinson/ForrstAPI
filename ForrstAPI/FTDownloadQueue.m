@@ -8,6 +8,7 @@
 
 #import "FTDownloadQueue.h"
 #import "NSString+Crypto.h"
+#import "FTConstants.h"
 
 #define FTStackCapacity 10
 
