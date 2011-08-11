@@ -10,6 +10,7 @@
 #import "FTCache.h"
 #import "FTDownloadQueue.h"
 #import "NSString+Crypto.h"
+#import "FTConstants.h"
 
 #import <UIKit/UIKit.h>
 

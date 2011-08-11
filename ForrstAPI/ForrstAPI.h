@@ -11,6 +11,7 @@
 #import "FTUser.h"
 #import "FTPost.h"
 #import "FTComment.h"
+#import "FTConstants.h"
 
 typedef void (^FTStatsCompletionBlock)(NSUInteger rateLimit, NSInteger callsMade);
 typedef void (^FTUserCompletionBlock)(FTUser *user);

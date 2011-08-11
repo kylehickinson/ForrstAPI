@@ -8,6 +8,7 @@
 
 #import "FTComment.h"
 #import "FTUser.h"
+#import "FTConstants.h"
 
 @implementation FTComment
 @synthesize commentID   = _commentID,
