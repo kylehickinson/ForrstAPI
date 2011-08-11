@@ -9,6 +9,8 @@
 #import "FTCache.h"
 #import "NSString+Crypto.h"
 #import <UIKit/UIKit.h>
+#import "FTConstants.h"
+
 
 @interface FTCache ()
 @property (strong) NSFileManager *fileManager;

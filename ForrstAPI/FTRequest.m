@@ -8,6 +8,7 @@
 
 #import "FTRequest.h"
 #import "JSONKit.h"
+#import "FTConstants.h"
 
 #import <UIKit/UIApplication.h>
 

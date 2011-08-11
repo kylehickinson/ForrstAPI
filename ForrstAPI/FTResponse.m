@@ -7,6 +7,7 @@
 //
 
 #import "FTResponse.h"
+#import "FTConstants.h"
 
 @implementation FTResponse
 @synthesize status      = _status,
