@@ -356,10 +356,10 @@ static ForrstAPI *_singleton = nil;
         if (response.status == FTStatusOk) {
             if (completion) {
                 NSMutableArray *_list = [[NSMutableArray alloc] init];
-                for (NSDictionary *post in [response.response objectForKey:@"comments"]) {
-                    FTPost *_post = [[FTPost alloc] initWithDictionary:post];
-                    [_list addObject:_post];
-                    [_post release];
+                for (NSDictionary *comment in [response.response objectForKey:@"comments"]) {
+                    FTComment *_comment = [[FTComment alloc] initWithDictionary:comment];
+                    [_list addObject:_comment];
+                    [_comment release];
                 }
                 completion(_list, [[response.response objectForKey:@"count"] unsignedIntegerValue]);
                 [_list release];

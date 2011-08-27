@@ -112,6 +112,8 @@
             }
             self.numberOfConnections--;
             
+            [self _downloadImage];
+            
 #if !USING_ARC
             [urlToDownload release];
             [urlHash release];

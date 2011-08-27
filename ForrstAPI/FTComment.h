@@ -11,12 +11,7 @@
 @class FTUser;
 
 @interface FTComment : NSObject {
-    NSUInteger  _commentID;
-    FTUser      *_user;
-    
-    NSString    *_body;
-    NSString    *_createdAt;
-    NSString    *_updatedAt;
+    NSMutableArray *_replies;
 }
 
 @property (readonly) NSUInteger     commentID;
@@ -24,6 +19,7 @@
 @property (readonly) NSString       *body;
 @property (readonly) NSString       *createdAt;
 @property (readonly) NSString       *updatedAt;
+@property (readonly) NSArray        *replies;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 

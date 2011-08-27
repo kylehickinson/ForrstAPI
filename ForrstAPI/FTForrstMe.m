@@ -9,7 +9,6 @@
 #import "FTForrstMe.h"
 #import "FTConstants.h"
 
-
 @interface FTForrstMe ()
 @property (strong) NSDictionary *data;
 @end

@@ -15,7 +15,8 @@
             user        = _user,
             body        = _body,
             createdAt   = _createdAt,
-            updatedAt   = _updatedAt;
+            updatedAt   = _updatedAt,
+            replies     = _replies;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
     if ((self = [super init])) {
@@ -26,6 +27,15 @@
         _createdAt = [[dictionary objectForKey:@"created_at"] copy];
         _updatedAt = [[dictionary objectForKey:@"updated_at"] copy];
         
+        _replies = [[NSMutableArray alloc] init];
+        NSArray *_theRepies = [dictionary objectForKey:@"replies"];
+        for (NSDictionary *dict in _theRepies) {
+            FTComment *comment = [[FTComment alloc] initWithDictionary:dict];
+            [_replies addObject:comment];
+#if !USING_ARC
+            [comment release];
+#endif
+        }
     }
     return self;
 }

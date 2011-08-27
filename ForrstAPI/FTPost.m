@@ -49,9 +49,10 @@
         case FTPostSnapSizeOriginal: _photoURL = _snapOriginalURL; break;
     }
     
-    __block NSString *key = [[_photoURL absoluteString] MD5];
+    NSString *key = [[_photoURL absoluteString] MD5];
 #if !USING_ARC
-    [key retain];
+    if (key)
+        [key retain];
 #endif
     [[FTCache cache] imageForKey:key completion:^(UIImage *image) {
         if (image == nil) {
@@ -60,6 +61,11 @@
                 [[FTCache cache] addImage:image forKey:key];
                 completion(image);
                 [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+                
+#if !USING_ARC
+                if (key)
+                    [key release];
+#endif
             }];
         } else {
             completion(image);

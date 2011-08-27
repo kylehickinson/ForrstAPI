@@ -11,7 +11,6 @@
 #import <UIKit/UIKit.h>
 #import "FTConstants.h"
 
-
 @interface FTCache ()
 @property (strong) NSFileManager *fileManager;
 @property (strong) NSMutableDictionary *memoryCache;
@@ -70,7 +69,7 @@
                 }
                 [pngRep writeToFile:path atomically:YES];
             });
-        }
+        } 
 #if !USING_ARC
         [path release];
 #endif
@@ -84,7 +83,7 @@
         if ([self.memoryCache objectForKey:key]) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 UIImage *image = [UIImage imageWithData:[self.memoryCache objectForKey:key]];
-                dispatch_sync(dispatch_get_main_queue(), ^{
+                dispatch_async(dispatch_get_main_queue(), ^{
                     completion(image);
                 });
             });
@@ -93,8 +92,8 @@
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                     NSData *_imageData = [NSData dataWithContentsOfFile:path];
                     UIImage *_image = [UIImage imageWithData:_imageData];
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                        [self.memoryCache setObject:_imageData forKey:key];
+                    [self.memoryCache setObject:_imageData forKey:key];
+                    dispatch_async(dispatch_get_main_queue(), ^{
                         completion(_image);
                     });
                 });
