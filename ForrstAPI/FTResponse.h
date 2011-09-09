@@ -19,9 +19,9 @@ typedef NSUInteger FTStatus;
 @property (readonly) FTStatus       status;
 @property (readonly) float          timespan;
 @property (readonly) BOOL           authed;
-@property (readonly) NSArray        *authedAs;
-@property (readonly) NSString       *environment;
-@property (readonly) NSDictionary   *response;
+@property (strong) NSArray        *authedAs;
+@property (strong) NSString       *environment;
+@property (strong) NSDictionary   *response;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 

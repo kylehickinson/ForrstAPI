@@ -11,6 +11,7 @@
 #import "FTUser.h"
 #import "FTPost.h"
 #import "FTComment.h"
+#import "FTNotification.h"
 #import "FTConstants.h"
 
 typedef void (^FTStatsCompletionBlock)(NSUInteger rateLimit, NSInteger callsMade);
@@ -46,5 +47,7 @@ typedef void (^FTErrorReturnBlock)(NSError *error);
 
 - (void)commentsForPostId:(NSString *)postID completion:(void (^)(NSArray *comments, NSUInteger count))completion fail:(void (^)(NSError *error))fail;
 - (void)commentsForPostTinyId:(NSString *)postID completion:(void (^)(NSArray *comments, NSUInteger count))completion fail:(void (^)(NSError *error))fail;
+
+- (void)notifications:(BOOL)grouped completion:(void (^)(NSArray *notifications, NSString *viewURLFormat))completion fail:(FTErrorReturnBlock)fail;
 
 @end

@@ -90,14 +90,18 @@
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         }
     } else {
-        self.onFail([NSError errorWithDomain:FTErrorDomainFailedRequest code:FTErrorDomainFailedRequestCode userInfo:nil]);
+        if (self.onFail) {
+            self.onFail([NSError errorWithDomain:FTErrorDomainFailedRequest code:FTErrorDomainFailedRequestCode userInfo:nil]);
+        }
     }
 }
 
 + (void)request:(NSURL *)url type:(FTRequestType)type completion:(NSCompletionBlock)completion fail:(void (^)(NSError *error))fail {
     FTRequest *request = [[FTRequest alloc] init];
     [request _request:url type:type completion:completion fail:fail];
+#if !USING_ARC
     [request autorelease];
+#endif
 }
 
 #pragma mark - NSConnection
@@ -118,6 +122,8 @@
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     [_requestData appendData:data];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    
 #if FT_API_LOG
     NSLog(@"FTRequest (%p) - connection:%@ didReceiveData:%@", self, connection, data);
 #endif

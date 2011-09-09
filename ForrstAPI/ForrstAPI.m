@@ -74,7 +74,9 @@ static ForrstAPI *_singleton = nil;
                 NSUInteger _rateLimit = [[response.response objectForKey:@"rate_limit"] unsignedIntegerValue];
                 NSString *_callsMade = [[response.response objectForKey:@"calls_made"] copy];
                 completion(_rateLimit, [_callsMade integerValue]);
+#if !USING_ARC
                 [_callsMade release];
+#endif
             }
         }
     } fail:fail];
@@ -115,7 +117,9 @@ static ForrstAPI *_singleton = nil;
             if (completion) {
                 FTUser *info = [[FTUser alloc] initWithDictionary:response.response];
                 completion(info);
+#if !USING_ARC
                 [info release];
+#endif
             }
         }
     } fail:fail];
@@ -172,10 +176,14 @@ static ForrstAPI *_singleton = nil;
                 for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
                     FTPost *_post = [[FTPost alloc] initWithDictionary:post];
                     [_posts addObject:_post];
+#if !USING_ARC
                     [_post release];
+#endif
                 }
                 completion(_posts);
+#if !USING_ARC
                 [_posts release];
+#endif
             }
         }
     } fail:fail];
@@ -199,7 +207,9 @@ static ForrstAPI *_singleton = nil;
             if (completion) {
                 FTPost *post = [[FTPost alloc] initWithDictionary:response.response];
                 completion(post);
+#if !USING_ARC
                 [post release];
+#endif
             }
         }
     } fail:fail];   
@@ -218,7 +228,9 @@ static ForrstAPI *_singleton = nil;
             if (completion) {
                 FTPost *post = [[FTPost alloc] initWithDictionary:response.response];
                 completion(post);
+#if !USING_ARC
                 [post release];
+#endif
             }
         }
     } fail:fail];
@@ -279,10 +291,14 @@ static ForrstAPI *_singleton = nil;
                 for (NSDictionary *post in [response.response objectForKey:@"posts"]) {
                     FTPost *_post = [[FTPost alloc] initWithDictionary:post];
                     [_list addObject:_post];
+#if !USING_ARC
                     [_post release];
+#endif
                 }
                 completion(_list, [((NSString *)[response.response objectForKey:@"page"]) integerValue]);
+#if !USING_ARC
                 [_list release];
+#endif
             }
         }
     } fail:fail];
@@ -359,10 +375,14 @@ static ForrstAPI *_singleton = nil;
                 for (NSDictionary *comment in [response.response objectForKey:@"comments"]) {
                     FTComment *_comment = [[FTComment alloc] initWithDictionary:comment];
                     [_list addObject:_comment];
+#if !USING_ARC
                     [_comment release];
+#endif
                 }
                 completion(_list, [[response.response objectForKey:@"count"] unsignedIntegerValue]);
+#if !USING_ARC
                 [_list release];
+#endif
             }
         }
     } fail:fail];
@@ -383,10 +403,47 @@ static ForrstAPI *_singleton = nil;
                 for (NSDictionary *comment in [response.response objectForKey:@"comments"]) {
                     FTComment *_comment = [[FTComment alloc] initWithDictionary:comment];
                     [_list addObject:_comment];
+#if !USING_ARC
                     [_comment release];
+#endif
                 }
                 completion(_list, [[response.response objectForKey:@"count"] unsignedIntegerValue]);
+#if !USING_ARC
                 [_list release];
+#endif
+            }
+        }
+    } fail:fail];
+}
+
+- (void)notifications:(BOOL)grouped completion:(void (^)(NSArray *notifications, NSString *viewURLFormat))completion fail:(FTErrorReturnBlock)fail
+{
+    //
+    // TODO: Actually complete grouping functionality.
+    // 
+//    __block BOOL isGrouped = grouped;
+    
+    NSURL *url = [self _setupURLWithString:@"notifications?grouped=false"];
+    
+#if FT_API_LOG 
+    NSLog(@"ForrstAPI (%p) - notificaions:%d completion:%@ fail:%@ (url=%@)", self, grouped, completion, fail, url);
+#endif
+    
+    [FTRequest request:url type:FTRequestTypeGet completion:^(FTResponse *response) {
+        if (response.status == FTStatusOk) {
+            if (completion) {
+                NSMutableArray *_notifications = [[NSMutableArray alloc] init];
+                for (NSDictionary *dictionary in [response.response objectForKey:@"items"]) {
+                    FTNotification *notification = [[FTNotification alloc] initWithDictionary:dictionary];
+                    [_notifications addObject:notification];
+#if !USING_ARC
+                    [notification release];
+#endif
+                }
+                completion(_notifications, [response.response objectForKey:@"view_url_format"]);
+#if !USING_ARC
+                [_notifications release];
+#endif
             }
         }
     } fail:fail];

@@ -63,12 +63,17 @@
     
     NSDictionary *dict = nil;
     
+    FTImageDownloaded downloadedBlock = [downloaded copy];
+    
     if (![self.downloads objectForKey:urlHash]) {
-        dict = [[NSDictionary alloc] initWithObjectsAndKeys:imageURL, @"url", [downloaded copy], @"block", nil];
+        dict = [[NSDictionary alloc] initWithObjectsAndKeys:imageURL, @"url", downloadedBlock, @"block", nil];
         [self.downloads setObject:dict forKey:urlHash];
         [self.hashes insertObject:urlHash atIndex:0];
     }
     
+#if !USING_ARC
+    [downloadedBlock release];
+#endif
     [self _downloadImage];
     
 #if !USING_ARC

@@ -48,25 +48,25 @@ typedef NSUInteger FTPostSnapSize;
 }
 
 @property (readonly) NSUInteger     postID;
-@property (readonly) NSString       *tinyID;
-@property (readonly) NSURL          *url;
+@property (strong) NSString       *tinyID;
+@property (strong) NSURL          *url;
 @property (readonly) FTPostType     type;
-@property (readonly) NSString       *createdAt;
-@property (readonly) NSString       *updatedAt;
-@property (readonly) FTUser         *user;
+@property (strong) NSString       *createdAt;
+@property (strong) NSString       *updatedAt;
+@property (strong) FTUser         *user;
 @property (readonly) BOOL           published;
 @property (readonly) BOOL           isPublic;
-@property (readonly) NSString       *title;
-@property (readonly) NSURL          *attachedURL;
-@property (readonly) NSString       *content;
-@property (readonly) NSString       *formattedContent;
-@property (readonly) NSString       *description;
-@property (readonly) NSString       *formattedDesc;
+@property (strong) NSString       *title;
+@property (strong) NSURL          *attachedURL;
+@property (strong) NSString       *content;
+@property (strong) NSString       *formattedContent;
+@property (strong) NSString       *description;
+@property (strong) NSString       *formattedDesc;
 @property (readonly) NSInteger      likeCount;
 @property (readonly) NSInteger      commentCount;
 @property (readonly) NSInteger      viewCount;
 
-@property (readonly) NSArray        *tags;
+@property (strong) NSArray        *tags;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 - (void)snapForSize:(FTPostSnapSize)size completion:(void (^)(UIImage *image))completion;

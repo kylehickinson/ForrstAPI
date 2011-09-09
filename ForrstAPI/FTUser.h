@@ -29,22 +29,22 @@ typedef NSUInteger FTUserPhotoSize;
 }
 
 @property (readonly) NSUInteger     userID;
-@property (readonly) NSString       *username;
-@property (readonly) NSString       *name;
+@property (strong) NSString       *username;
+@property (strong) NSString       *name;
 @property (readonly) BOOL           availableForWork;
-@property (readonly) NSURL          *url;
+@property (strong) NSURL          *url;
 @property (readonly) NSInteger      posts;
 @property (readonly) NSInteger      comments;
 @property (readonly) NSInteger      likes;
 @property (readonly) NSInteger      followers;
 @property (readonly) NSInteger      following;
-@property (readonly) NSString       *bio;
-@property (readonly) NSString       *type;
-@property (readonly) NSURL          *homepage;
-@property (readonly) NSString       *twitter;
+@property (strong) NSString       *bio;
+@property (strong) NSString       *type;
+@property (strong) NSURL          *homepage;
+@property (strong) NSString       *twitter;
 @property (readonly) BOOL           inDirectory;
-@property (readonly) NSArray        *tags;
-@property (readonly) FTForrstMe     *forrstMe;
+@property (strong) NSArray        *tags;
+@property (strong) FTForrstMe     *forrstMe;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 - (void)photoForSize:(FTUserPhotoSize)size completion:(void (^)(UIImage *image))completion;

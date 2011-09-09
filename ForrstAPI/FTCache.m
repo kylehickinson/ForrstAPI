@@ -31,26 +31,26 @@
     return _cache;
 }
 
-- (void)clearMemoryCache {
+- (void)flush
+{
+    [self clearMemoryCache];
+    //
+    // TODO: Delete all files in the cache
+    //
+}
+
+- (void)clearMemoryCache 
+{
     [self.memoryCache removeAllObjects];
 }
 
 - (id)init {
     if ((self = [super init])) {
-        _fileManager = [[NSFileManager defaultManager] retain];
+        _fileManager = [NSFileManager defaultManager];
+#if !USING_ARC
+        [_fileManager retain];
+#endif
         _memoryCache = [[NSMutableDictionary alloc] init];
-        
-//        NSString *path = [[NSTemporaryDirectory() stringByAppendingPathComponent:FT_CACHE_SNAPS_DIR] retain];
-//        if (![_fileManager fileExistsAtPath:path]) {
-//            [_fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-//        }
-//        [path release];
-//        path = [[NSTemporaryDirectory() stringByAppendingPathComponent:FT_CACHE_USERAVS_DIR] retain];
-//        
-//        if (![_fileManager fileExistsAtPath:path]) {
-//            [_fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-//        }
-//        [path release];
     }
     return self;
 }

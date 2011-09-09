@@ -63,12 +63,15 @@
                 [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
                 
 #if !USING_ARC
-                if (key)
-                    [key release];
+                [key release];
 #endif
             }];
         } else {
             completion(image);
+            
+#if !USING_ARC
+            [key release];
+#endif
         }
     }];
 }
@@ -90,7 +93,9 @@
         } else {
             _type = FTPostTypeQuestion;
         }
+#if !USING_ARC
         [_temp release];
+#endif
         
         _createdAt = [[dictionary objectForKey:@"created_at"] copy];
         _updatedAt = [[dictionary objectForKey:@"updated_at"] copy];

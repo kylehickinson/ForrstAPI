@@ -11,6 +11,7 @@
 #import "FTDownloadQueue.h"
 #import "NSString+Crypto.h"
 #import "FTConstants.h"
+#import "UIImage+FTAdditions.h"
 
 #import <UIKit/UIKit.h>
 
@@ -53,17 +54,20 @@
         if (image == nil) {
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
             [[FTDownloadQueue defaultManager] enqueueDownload:_photoURL completed:^(UIImage *image) {
-                [[FTCache cache] addImage:image forKey:key];
-                completion(image);
+                UIImage *roundedImage = [UIImage roundedImage:image cornerRadius:8.0f resizeTo:CGSizeMake(100, 100)];
+                [[FTCache cache] addImage:roundedImage forKey:key];
+                completion(roundedImage);
                 [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-                
 #if !USING_ARC
-                if (key)
-                    [key release];
+                [key release];
 #endif
             }];           
         } else {
             completion(image);
+            
+#if !USING_ARC
+            [key release];
+#endif
         }
     }];
 }
@@ -97,7 +101,9 @@
         _photosMediumURL = [[NSURL alloc] initWithString:[photos objectForKey:@"medium_url"]];
         _photosSmallURL = [[NSURL alloc] initWithString:[photos objectForKey:@"small_url"]];
         _photosThumbURL = [[NSURL alloc] initWithString:[photos objectForKey:@"thumb_url"]];
+#if !USING_ARC
         [photos release];
+#endif
         
         _forrstMe = [[FTForrstMe alloc] initWithDictionary:[dictionary objectForKey:@"forrst_me"]];
     }

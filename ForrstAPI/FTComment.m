@@ -40,6 +40,7 @@
     return self;
 }
 
+#if !USING_ARC
 - (void)dealloc {
     FT_RELEASE(_user);
     FT_RELEASE(_body);
@@ -48,5 +49,6 @@
     
     [super dealloc];
 }
+#endif
 
 @end

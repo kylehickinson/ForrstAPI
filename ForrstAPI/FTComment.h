@@ -12,6 +12,11 @@
 
 @interface FTComment : NSObject {
     NSMutableArray *_replies;
+    
+    FTUser *_user;
+    NSString *_body;
+    NSString *_createdAt;
+    NSString *_updatedAt;
 }
 
 @property (readonly) NSUInteger     commentID;

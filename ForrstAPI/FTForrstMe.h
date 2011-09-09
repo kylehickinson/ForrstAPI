@@ -35,6 +35,6 @@ typedef NSUInteger FTMeSocial;
 - (void)socialInfoFor:(FTMeSocial)network info:(FTSocialInfoReturnBlock)info;
 
 @property (readonly) BOOL       contact;
-@property (readonly) NSString   *domain;
+@property (strong) NSString   *domain;
 
 @end

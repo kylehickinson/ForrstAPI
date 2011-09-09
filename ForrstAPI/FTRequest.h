@@ -12,7 +12,7 @@
 #define FTErrorDomainStatusFail             @"FTErrorDomainStatusFail"
 #define FTErrorDomainStatusFailCode         -1
 
-#define FTErrorDomainInvalidResults         @"FTERrorDomainInvalidResults" 
+#define FTErrorDomainInvalidResults         @"FTErrorDomainInvalidResults" 
 #define FTErrorDomainInvalidResultsCode     -2
 
 #define FTErrorDomainFailedRequest          @"FTErrorDomainFailedRequest"
