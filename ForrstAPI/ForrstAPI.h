@@ -49,5 +49,6 @@ typedef void (^FTErrorReturnBlock)(NSError *error);
 - (void)commentsForPostTinyId:(NSString *)postID completion:(void (^)(NSArray *comments, NSUInteger count))completion fail:(void (^)(NSError *error))fail;
 
 - (void)notifications:(BOOL)grouped completion:(void (^)(NSArray *notifications, NSString *viewURLFormat))completion fail:(FTErrorReturnBlock)fail;
+- (void)markNotificationAsRead:(NSString *)notificationID completion:(void (^)())completion fail:(FTErrorReturnBlock)fail;
 
 @end

@@ -9,8 +9,13 @@
 #import "ForrstAPI.h"
 #import "FTRequest.h"
 
+@interface ForrstAPI ()
+@property (nonatomic, copy) NSString *viewURLFormat;
+@end
+
 @implementation ForrstAPI
 @synthesize authToken = _authToken;
+@synthesize viewURLFormat = _viewURLFormat;
 
 static ForrstAPI *_singleton = nil;
 + (ForrstAPI *)engine {
@@ -53,7 +58,7 @@ static ForrstAPI *_singleton = nil;
     
     return [NSURL URLWithString:
                 [[NSString stringWithFormat:@"%@%@%@", 
-                                            FT_API_BASEURL, 
+                  ([url hasPrefix:@"https:"] ? @"" : FT_API_BASEURL), 
                                             url,
                                             (self.authToken ? [NSString stringWithFormat:@"%@access_token=%@", (hasParams ? @"&" : @"?"), self.authToken] : @"")] 
                 stringByReplacingPercentEscapesUsingEncoding:NSASCIIStringEncoding]
@@ -431,20 +436,44 @@ static ForrstAPI *_singleton = nil;
     
     [FTRequest request:url type:FTRequestTypeGet completion:^(FTResponse *response) {
         if (response.status == FTStatusOk) {
-            if (completion) {
-                NSMutableArray *_notifications = [[NSMutableArray alloc] init];
-                for (NSDictionary *dictionary in [response.response objectForKey:@"items"]) {
-                    FTNotification *notification = [[FTNotification alloc] initWithDictionary:dictionary];
-                    [_notifications addObject:notification];
+            NSMutableArray *_notifications = [[NSMutableArray alloc] init];
+            for (NSDictionary *dictionary in [response.response objectForKey:@"items"]) {
+                FTNotification *notification = [[FTNotification alloc] initWithDictionary:dictionary];
+                [_notifications addObject:notification];
 #if !USING_ARC
-                    [notification release];
-#endif
-                }
-                completion(_notifications, [response.response objectForKey:@"view_url_format"]);
-#if !USING_ARC
-                [_notifications release];
+                [notification release];
 #endif
             }
+            
+            NSString *viewURLFormat = [response.response objectForKey:@"view_url_format"];
+            
+            
+            if (!self.viewURLFormat) {
+                self.viewURLFormat = [viewURLFormat stringByReplacingCharactersInRange:NSMakeRange([viewURLFormat length]-3, 3) withString:@""];
+            }
+            
+            if (completion) {
+                completion(_notifications, viewURLFormat);
+            }
+#if !USING_ARC
+            [_notifications release];
+#endif
+        }
+    } fail:fail];
+}
+
+- (void)markNotificationAsRead:(NSString *)notificationID completion:(void (^)())completion fail:(FTErrorReturnBlock)fail
+{
+    NSLog(@"%@",[self.viewURLFormat stringByAppendingString:notificationID]);
+    NSURL *url = [self _setupURLWithString:[self.viewURLFormat stringByAppendingString:notificationID]];
+    
+//#if FT_API_LOG 
+    NSLog(@"ForrstAPI (%p) - markNotificationAsRead:%@ completion:%@ fail:%@ (url=%@)", self, notificationID, completion, fail, url);
+//#endif
+    
+    [FTRequest request:url type:FTRequestTypeGet completion:^(FTResponse *response) {
+        if (completion) {
+            completion();
         }
     } fail:fail];
 }

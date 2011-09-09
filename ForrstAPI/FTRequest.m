@@ -144,19 +144,26 @@
     JSONDecoder *_decoder = [[JSONDecoder alloc] init];
     NSDictionary *results = [_decoder objectWithData:_requestData];
     
+    // Make sure that we're not just making a regular request like say, 
+    // marking a notification as read, if not then theres not going to be
+    // a returned dictionary.
+    BOOL isAPIRequest = [[self.request.URL absoluteString] hasPrefix:FT_API_BASEURL];
+    
     if (!results) { 
-        if (self.onFail) {
-            self.onFail([NSError errorWithDomain:FTErrorDomainInvalidResults code:FTErrorDomainInvalidResultsCode userInfo:results]);
+        if (isAPIRequest) {
+            if (self.onFail) {
+                self.onFail([NSError errorWithDomain:FTErrorDomainInvalidResults code:FTErrorDomainInvalidResultsCode userInfo:results]);
+            }
+    #if !USING_ARC
+            [_decoder release];
+    #endif
+            return;
         }
-#if !USING_ARC
-        [_decoder release];
-#endif
-        return;
     }
     
     FTResponse *response = [[FTResponse alloc] initWithDictionary:results];
     
-    if (response.status == FTStatusFail) {
+    if (response.status == FTStatusFail && isAPIRequest) {
         if (self.onFail) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.onFail([NSError errorWithDomain:FTErrorDomainStatusFail code:FTErrorDomainStatusFailCode userInfo:results]);
