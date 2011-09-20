@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NSString+Crypto.h"
 
 typedef void (^FTImageCompletion)(UIImage *image);
 

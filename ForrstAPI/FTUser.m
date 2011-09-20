@@ -35,7 +35,7 @@
             forrstMe        = _forrstMe;
 
 - (void)photoForSize:(FTUserPhotoSize)size completion:(void (^)(UIImage *image))completion {
-    __block NSURL *_photoURL;
+    __block NSURL *_photoURL = nil;
 
     switch (size) {
         case FTUserPhotoSizeXL: _photoURL = _photosXLURL; break;

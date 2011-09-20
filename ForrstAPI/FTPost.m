@@ -37,7 +37,7 @@
             tags                    = _tags;
 
 - (void)snapForSize:(FTPostSnapSize)size completion:(void (^)(UIImage *image))completion {
-    __block NSURL *_photoURL;
+    __block NSURL *_photoURL = nil;
     
     switch (size) {
         case FTPostSnapSizeMega: _photoURL = _snapMegaURL; break;

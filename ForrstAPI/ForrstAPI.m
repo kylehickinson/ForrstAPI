@@ -464,12 +464,11 @@ static ForrstAPI *_singleton = nil;
 
 - (void)markNotificationAsRead:(NSString *)notificationID completion:(void (^)())completion fail:(FTErrorReturnBlock)fail
 {
-    NSLog(@"%@",[self.viewURLFormat stringByAppendingString:notificationID]);
     NSURL *url = [self _setupURLWithString:[self.viewURLFormat stringByAppendingString:notificationID]];
     
-//#if FT_API_LOG 
+#if FT_API_LOG 
     NSLog(@"ForrstAPI (%p) - markNotificationAsRead:%@ completion:%@ fail:%@ (url=%@)", self, notificationID, completion, fail, url);
-//#endif
+#endif
     
     [FTRequest request:url type:FTRequestTypeGet completion:^(FTResponse *response) {
         if (completion) {

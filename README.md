@@ -9,6 +9,7 @@ ForrstAPI is a fully integrated iOS objective-C wrapper for the Forrst API.  All
 * Viewing all posts in chronological order (currently, limited by the API to only be sorted by recent)
 * Viewing all posts of a given type (snap/code/link/question)
 * Viewing comments of a given post
+* Notifications & marking them as read
 
 ## Dependencies
 
@@ -52,8 +53,7 @@ Information that ForrstAPI grabs is parsed and returned to the caller as an obje
 
 #### Authentication
 
-At the moment, as mentioned above, authentication is disabled, but when it becomes enabled ForrstAPI will already be ready to authenticate.  It is only required that you call `authWithUser:password:completion:fail:` once, and after that the auth token will automatically be appended to all other calls.
-
+It is only required that you call `authWithUser:password:completion:fail:` once, and after that the auth token will automatically be appended to all other calls.
 The token may also be saved upon the completion block, and then later assigned using the `authToken` property in ForrstAPI.
 
 #### Logging

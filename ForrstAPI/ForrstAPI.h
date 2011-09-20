@@ -38,7 +38,7 @@ typedef void (^FTErrorReturnBlock)(NSError *error);
 - (void)userPostsForUser:(NSString *)user options:(NSDictionary *)options completion:(void (^)(NSArray *posts))completion fail:(void (^)(NSError *error))fail;
 
 - (void)postForID:(NSString *)postID completion:(void (^)(FTPost *post))completion fail:(void (^)(NSError *error))fail;
-- (void)postForTinyID:(NSString *)postID completion:(void (^)(FTPost *post))completion fail:(void (^)(NSError *error))fail;\
+- (void)postForTinyID:(NSString *)postID completion:(void (^)(FTPost *post))completion fail:(void (^)(NSError *error))fail;
 
 - (void)listPostsForType:(FTPostType)type completion:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail;
 - (void)listPostsForType:(FTPostType)type options:(NSDictionary *)options completion:(void (^)(NSArray *posts, NSUInteger page))completion fail:(void (^)(NSError *error))fail;

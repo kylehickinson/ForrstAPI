@@ -20,7 +20,7 @@
 - (id)initWithDictionary:(NSDictionary *)dictionary
 {
     if ((self = [super init])) {
-        self.dictionary = [dictionary mutableCopy];
+        _dictionary = [dictionary mutableCopy];
     }
     return self;
 }
@@ -53,7 +53,7 @@
 {
     if (FTAssertDictionary()) return nil;
     
-    return [self.dictionary objectForKey:@"behaviour"];
+    return [self.dictionary objectForKey:@"behavior"];
 }
 
 - (NSInteger)userID
