@@ -9,7 +9,7 @@ ForrstAPI is a fully integrated iOS objective-C wrapper for the Forrst API.  All
 * Viewing all posts in chronological order (currently, limited by the API to only be sorted by recent)
 * Viewing all posts of a given type (snap/code/link/question)
 * Viewing comments of a given post
-* Notifications & marking them as read
+* Notifications (excluding jobs since they are currently experimental) & marking them as read
 
 ## Dependencies
 

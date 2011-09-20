@@ -439,7 +439,9 @@ static ForrstAPI *_singleton = nil;
             NSMutableArray *_notifications = [[NSMutableArray alloc] init];
             for (NSDictionary *dictionary in [response.response objectForKey:@"items"]) {
                 FTNotification *notification = [[FTNotification alloc] initWithDictionary:dictionary];
-                [_notifications addObject:notification];
+                if (![notification.behavior isEqualToString:@"job_test"]) {
+                    [_notifications addObject:notification];
+                }
 #if !USING_ARC
                 [notification release];
 #endif
